@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,10 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
     <style>
         :root {
-            --brand-dark-blue: #302261; /* Pantone 274C */
+            --brand-dark-blue: #302261;
             --brand-white: #ffffff;
-            --brand-mid-blue: #6b6eb3; /* Pantone 7456C */
-            --brand-red: #f04e58; /* Pantone Red 032C */
+            --brand-mid-blue: #6b6eb3;
+            --brand-red: #f04e58;
             --brand-black: #000000;
             --brand-grey: #b2bcce;
             
@@ -38,34 +39,6 @@
             perspective: 2500px;
         }
 
-        /* Search Bar Styles */
-        .search-container {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
-            width: 90%;
-            max-width: 400px;
-        }
-
-        #recipeSearch {
-            flex-grow: 1;
-            padding: 8px 20px;
-            border-radius: 30px;
-            border: 2px solid var(--brand-dark-blue);
-            font-family: var(--font-condensed);
-            font-size: 1rem;
-            outline: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        #recipeSearch:focus {
-            border-color: var(--brand-red);
-        }
-
         .stage {
             width: 100%;
             height: 100vh;
@@ -75,7 +48,6 @@
             position: relative;
         }
 
-        /* Responsive centered book frame matching standard magazine layout */
         .book-container {
             position: relative;
             height: 82vh;
@@ -85,6 +57,8 @@
             aspect-ratio: 1.4 / 1;
             perspective: 3000px;
             margin: 0 auto;
+            /* Added transition for shifting the book gracefully when opened/closed */
+            transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
         }
 
         .book {
@@ -92,26 +66,28 @@
             height: 100%;
             position: relative;
             transform-style: preserve-3d;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            border-radius: 6px;
         }
 
         .page {
             position: absolute;
             top: 0;
-            left: 0;
+            left: 50%; /* Pages rest on the right half initially */
             width: 50%;
             height: 100%;
-            transform-origin: right center;
+            /* FIX: Hinge is on the left center of the right half */
+            transform-origin: left center; 
             transform-style: preserve-3d;
             transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
             background-color: var(--brand-white);
-            left: 50%;
+            border-radius: 0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05), 5px 5px 15px rgba(0,0,0,0.15);
         }
 
-        .page.left-side {
-            left: 0;
-            transform-origin: left center;
+        .page.flipped {
+            /* Flip to the left side */
+            transform: rotateY(-180deg);
+            border-radius: 0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05), -5px 5px 15px rgba(0,0,0,0.15);
         }
 
         .front, .back {
@@ -125,29 +101,28 @@
             overflow: hidden;
             background-color: var(--brand-white);
             container-type: inline-size;
+            border-radius: inherit;
         }
 
         .back {
             transform: rotateY(180deg);
         }
 
-        .flipped {
-            transform: rotateY(-180deg);
-        }
-
-        /* Full color hardcover integration */
         .hardcover .front, .hardcover .back {
             background-color: var(--brand-dark-blue) !important;
-            box-shadow: inset 12px 0px 25px rgba(0,0,0,0.6);
+            box-shadow: inset 15px 0px 30px rgba(0,0,0,0.5);
+        }
+
+        .page.flipped .hardcover .front, .page.flipped .hardcover .back {
+            box-shadow: inset -15px 0px 30px rgba(0,0,0,0.5);
         }
 
         .paper .front {
             background: linear-gradient(to right, #e5e7eb 0%, #ffffff 5%, #ffffff 100%);
-            box-shadow: inset -2px 0px 6px rgba(0,0,0,0.08);
         }
+        
         .paper .back {
             background: linear-gradient(to left, #e5e7eb 0%, #ffffff 5%, #ffffff 100%);
-            box-shadow: inset 2px 0px 6px rgba(0,0,0,0.08);
         }
 
         .inner-page {
@@ -172,27 +147,12 @@
             z-index: 10;
         }
 
-        .brand-logo {
-            width: 38%;
-            max-width: 130px;
-            margin-bottom: 2.5%;
-            display: block;
-        }
-
-        .cover-cow {
-            width: 36% !important;
-            max-width: 120px;
-            margin-bottom: 2.5%;
-            border-radius: 8px;
-            background-color: #ffffff;
-            padding: 4px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            display: block !important;
-        }
+        .brand-logo { width: 38%; max-width: 130px; margin-bottom: 2.5%; display: block; }
+        .cover-cow { width: 36% !important; max-width: 120px; margin-bottom: 2.5%; border-radius: 8px; background-color: #ffffff; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: block !important; }
 
         .title-main {
             font-family: var(--font-compressed);
-            font-size: 7.5cqi;
+            font-size: 9cqi;
             font-weight: 700;
             line-height: 0.95;
             text-transform: uppercase;
@@ -200,15 +160,8 @@
             text-align: center;
         }
 
-        .community-badge {
-            width: 55%;
-            max-width: 160px;
-            margin-top: auto; 
-            margin-bottom: 2%;
-            display: block;
-            z-index: 15;
-        }
-
+        .community-badge { width: 55%; max-width: 160px; margin-top: auto; margin-bottom: 2%; display: block; z-index: 15; }
+        
         .milky-wave {
             position: absolute;
             bottom: 0;
@@ -236,7 +189,7 @@
             padding: 2.5% 5.5%;
             font-family: var(--font-condensed);
             font-weight: bold;
-            font-size: 4cqi;
+            font-size: 5cqi;
             border-radius: 5px;
             text-transform: uppercase;
             transform: rotate(-3deg);
@@ -251,15 +204,12 @@
             min-height: 0;
         }
 
-        /* Scrollable container class */
         .scrollable {
             overflow-y: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
-        .scrollable::-webkit-scrollbar {
-            display: none;
-        }
+        .scrollable::-webkit-scrollbar { display: none; }
 
         .recipe-header {
             grid-column: 1 / -1;
@@ -271,36 +221,20 @@
 
         .recipe-title {
             font-family: var(--font-compressed);
-            font-size: 4.5cqi;
+            font-size: 5.5cqi;
             color: var(--brand-dark-blue);
             text-transform: uppercase;
             line-height: 1;
         }
 
-        .recipe-meta {
-            font-family: var(--font-hand);
-            color: var(--brand-red);
-            font-size: 2.2cqi;
-            margin-top: 0.5%;
-        }
-
-        .recipe-col {
-            display: flex;
-            flex-direction: column;
-            padding-right: 4px;
-        }
-
-        .ingredients-box {
-            background-color: rgba(107, 110, 179, 0.1);
-            padding: 3.5%;
-            border-radius: 8px;
-            height: fit-content;
-        }
-
+        .recipe-meta { font-family: var(--font-hand); color: var(--brand-red); font-size: 2.8cqi; margin-top: 0.5%; }
+        .recipe-col { display: flex; flex-direction: column; padding-right: 4px; }
+        .ingredients-box { background-color: rgba(107, 110, 179, 0.1); padding: 3.5%; border-radius: 8px; height: fit-content; }
+        
         .recipe-h3 {
             font-family: var(--font-condensed);
             color: var(--brand-dark-blue);
-            font-size: 2.5cqi;
+            font-size: 3.2cqi;
             margin-bottom: 1.2%;
             text-transform: uppercase;
         }
@@ -308,158 +242,52 @@
         .recipe-list {
             list-style-type: none;
             font-family: var(--font-condensed);
-            font-size: 2cqi;
+            font-size: 2.6cqi;
             line-height: 1.25;
         }
-
-        .recipe-list li {
-            margin-bottom: 1.2%;
-            position: relative;
-        }
-
-        .ingredients-list li {
-            padding-left: 4.5%;
-        }
-        
+        .recipe-list li { margin-bottom: 1.2%; position: relative; }
+        .ingredients-list li { padding-left: 4.5%; }
         .ingredients-list li::before {
-            content: '•';
-            color: var(--brand-mid-blue);
-            position: absolute;
-            left: 0;
-            font-weight: bold;
+            content: '•'; color: var(--brand-mid-blue); position: absolute; left: 0; font-weight: bold;
         }
 
-        .steps-list {
-            counter-reset: step-counter;
-        }
-
-        .steps-list li {
-            padding-left: 7%;
-            margin-bottom: 1.5%;
-        }
-
+        .steps-list { counter-reset: step-counter; }
+        .steps-list li { padding-left: 7%; margin-bottom: 1.5%; }
         .steps-list li::before {
-            counter-increment: step-counter;
-            content: counter(step-counter);
-            position: absolute;
-            left: 0;
-            top: 0;
-            background-color: var(--brand-dark-blue);
-            color: white;
-            width: 2.2cqi;
-            height: 2.2cqi;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--font-compressed);
-            font-size: 1.2cqi;
+            counter-increment: step-counter; content: counter(step-counter);
+            position: absolute; left: 0; top: 0;
+            background-color: var(--brand-dark-blue); color: white;
+            width: 2.8cqi; height: 2.8cqi; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-compressed); font-size: 1.6cqi;
         }
 
-        .dairy-range {
-            display: flex;
-            flex-direction: column;
-            gap: 2%;
-            flex-grow: 1;
-            margin-top: 1%;
-            padding-bottom: 5px;
-        }
-
+        .dairy-range { display: flex; flex-direction: column; gap: 2%; flex-grow: 1; margin-top: 1%; padding-bottom: 5px; }
         .product-item {
-            display: flex;
-            align-items: center;
-            background: #ffffff;
-            border-radius: 8px;
-            padding: 2%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            flex-shrink: 0;
+            display: flex; align-items: center; background: #ffffff;
+            border-radius: 8px; padding: 2%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); flex-shrink: 0;
         }
+        .product-item img { width: 15%; height: auto; margin-right: 4%; border-radius: 4px; }
+        .product-info h4 { font-family: var(--font-compressed); color: var(--brand-dark-blue); font-size: 3.5cqi; text-transform: uppercase; margin-bottom: 0.3%; }
+        .product-info p { font-family: var(--font-condensed); font-size: 2.4cqi; color: #4b5563; line-height: 1.2; }
 
-        .product-item img {
-            width: 15%;
-            height: auto;
-            margin-right: 4%;
-            border-radius: 4px;
-        }
-
-        .product-info h4 {
-            font-family: var(--font-compressed);
-            color: var(--brand-dark-blue);
-            font-size: 2.8cqi;
-            text-transform: uppercase;
-            margin-bottom: 0.3%;
-        }
-
-        .product-info p {
-            font-family: var(--font-condensed);
-            font-size: 1.8cqi;
-            color: #4b5563;
-            line-height: 1.2;
-        }
-
-        .index-list {
-            list-style: none;
-            margin-top: 2%;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
+        .index-list { list-style: none; margin-top: 2%; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
         .index-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 3.5%;
-            border-bottom: 2px dotted var(--brand-grey);
-            cursor: pointer;
-            transition: color 0.2s;
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin-bottom: 3.5%; border-bottom: 2px dotted var(--brand-grey); cursor: pointer; transition: color 0.2s;
         }
-
         .index-item:hover { color: var(--brand-red); }
-        .index-name {
-            font-family: var(--font-condensed);
-            font-size: 3cqi;
-            font-weight: bold;
-            color: var(--brand-dark-blue);
-            text-transform: uppercase;
-        }
-        .index-page-num {
-            font-family: var(--font-compressed);
-            font-size: 3.4cqi;
-            color: var(--brand-red);
-        }
+        .index-name { font-family: var(--font-condensed); font-size: 3.8cqi; font-weight: bold; color: var(--brand-dark-blue); text-transform: uppercase; }
+        .index-page-num { font-family: var(--font-compressed); font-size: 4cqi; color: var(--brand-red); }
 
         .back-cover-wrap {
-            container-type: inline-size;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            text-align: center;
-            color: white;
-            padding: 6%;
+            container-type: inline-size; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; height: 100%; text-align: center; color: white; padding: 6%;
         }
-        
-        .back-cover-wrap h2 {
-            font-family: var(--font-compressed);
-            font-size: 7cqi;
-            margin-bottom: 2%;
-            color: var(--brand-white);
-        }
+        .back-cover-wrap h2 { font-family: var(--font-compressed); font-size: 8.5cqi; margin-bottom: 2%; color: var(--brand-white); }
+        .back-cover-wrap p { font-family: var(--font-condensed); font-size: 2.6cqi; color: var(--brand-grey); margin-bottom: 1.5%; }
 
-        .back-cover-wrap p {
-            font-family: var(--font-condensed);
-            font-size: 2cqi;
-            color: var(--brand-grey);
-            margin-bottom: 1.5%;
-        }
-
-        .recipe-dark {
-            background-color: var(--brand-dark-blue);
-            color: white;
-        }
+        .recipe-dark { background-color: var(--brand-dark-blue); color: white; }
         .recipe-dark .recipe-title, .recipe-dark .recipe-h3 { color: white; }
         .recipe-dark .recipe-header { border-bottom-color: var(--brand-mid-blue); }
         .recipe-dark .ingredients-box { background-color: rgba(255,255,255,0.05); }
@@ -467,106 +295,63 @@
         .recipe-dark .ingredients-list li::before { color: var(--brand-red); }
 
         .controls {
-            position: absolute;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-            z-index: 1000;
+            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 15px; z-index: 1000;
         }
-
         .btn {
-            background-color: var(--brand-dark-blue);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 7px 20px;
-            font-family: var(--font-condensed);
-            font-size: 0.85rem;
-            border-radius: 30px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: all 0.2s;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 1px;
+            background-color: var(--brand-dark-blue); color: white; border: 1px solid rgba(255,255,255,0.2);
+            padding: 7px 20px; font-family: var(--font-condensed); font-size: 0.85rem;
+            border-radius: 30px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: all 0.2s; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;
         }
-
         .btn:hover:not(:disabled) { background-color: var(--brand-mid-blue); transform: translateY(-2px); }
         .btn:active:not(:disabled) { transform: translateY(1px); }
         .btn:disabled { background-color: rgba(48, 34, 97, 0.4); cursor: not-allowed; transform: none; color: #aaa;}
 
         .page-footer {
-            position: absolute;
-            bottom: 2%;
-            width: 100%;
-            text-align: center;
-            font-family: var(--font-condensed);
-            font-size: 1.8cqi;
-            color: var(--brand-grey);
-            left: 0;
+            position: absolute; bottom: 2%; width: 100%; text-align: center;
+            font-family: var(--font-condensed); font-size: 2.4cqi; color: var(--brand-grey); left: 0;
         }
 
         @media (max-width: 768px) {
             .book-container {
                 height: auto;
-                aspect-ratio: 0.85 / 1; 
-                width: 95vw;
+                aspect-ratio: 1.2 / 1; /* Maintained wide ratio to simulate actual open book on mobile */
+                width: 98vw;
                 max-height: 85vh;
             }
-            .search-container {
-                top: 10px;
-            }
-            .mag-layout {
-                grid-template-columns: 1fr;
-                gap: 5%;
-                overflow-y: auto;
-                padding-bottom: 10px;
-            }
-            .recipe-col {
-                overflow-y: visible;
-            }
+            .mag-layout { grid-template-columns: 1fr; gap: 5%; overflow-y: auto; padding-bottom: 10px; }
+            .recipe-col { overflow-y: visible; }
             
-            .title-main { font-size: 14cqi; }
-            .recipe-title { font-size: 8cqi; }
-            .recipe-h3 { font-size: 5cqi; }
-            .recipe-list { font-size: 4cqi; }
-            .recipe-meta { font-size: 3.5cqi; }
+            .title-main { font-size: 16cqi; }
+            .recipe-title { font-size: 10cqi; }
+            .recipe-h3 { font-size: 6cqi; }
+            .recipe-list { font-size: 4.8cqi; }
+            .recipe-meta { font-size: 4cqi; }
             
-            .steps-list li::before { width: 4cqi; height: 4cqi; font-size: 2.2cqi; }
-            .product-info h4 { font-size: 5.5cqi; }
-            .product-info p { font-size: 4cqi; }
-            .index-name { font-size: 5.5cqi; }
-            .index-page-num { font-size: 6cqi; }
-            .back-cover-wrap h2 { font-size: 12cqi; }
-            .back-cover-wrap p { font-size: 3.5cqi; }
-            .img-overlay { font-size: 6cqi; }
-            .page-footer { font-size: 3.5cqi; }
+            .steps-list li::before { width: 5cqi; height: 5cqi; font-size: 2.8cqi; }
+            .product-info h4 { font-size: 6.5cqi; }
+            .product-info p { font-size: 4.8cqi; }
+            .index-name { font-size: 6.5cqi; }
+            .index-page-num { font-size: 7cqi; }
+            .back-cover-wrap h2 { font-size: 14cqi; }
+            .back-cover-wrap p { font-size: 4.5cqi; }
+            .img-overlay { font-size: 7cqi; }
+            .page-footer { font-size: 4.5cqi; }
         }
     </style>
 </head>
 <body>
-
-    <!-- Search Bar Section -->
-    <div class="search-container">
-        <input list="recipeList" id="recipeSearch" placeholder="Search recipes..." autocomplete="off">
-        <datalist id="recipeList">
-            <option value="Biscoff Cheesecake">
-            <option value="Persian Cream Cheese Log">
-            <option value="Vanilla Panna Cotta">
-        </datalist>
-        <button class="btn" onclick="executeSearch()">Find</button>
-    </div>
 
     <div class="stage">
         <div class="book-container" id="bookContainer">
             <div class="book" id="book">
                 
                 <!-- PAGE 1: Front Cover & Our Dairy Range -->
-                <div class="page" id="p1" style="z-index: 6;">
+                <div class="page" id="p1">
                     <div class="front hardcover" style="background-color: var(--brand-dark-blue);">
                         <div class="cover-content">
-                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/sundalelogo.png" alt="Sundale Logo" class="brand-logo" onerror="this.outerHTML='<h2 style=\'font-family:var(--font-compressed); font-size:7cqi; color:white; letter-spacing:2px; margin-bottom:2%;\'>Sundale</h2>'">
+                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/sundalelogo.png" alt="Sundale Logo" class="brand-logo" onerror="this.outerHTML='<h2 style=\'font-family:var(--font-compressed); font-size:8.5cqi; color:white; letter-spacing:2px; margin-bottom:2%;\'>Sundale</h2>'">
                             <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/COW.jpg" alt="Grazing Cow" class="cover-cow" onerror="this.style.display='none'">
                             <h1 class="title-main">Recipe<br>Book</h1>
                             <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Nourishing-Communties.png" alt="Nourishing Communities" class="community-badge">
@@ -609,14 +394,14 @@
                 </div>
 
                 <!-- PAGE 2: Family Recipes Intro & Contents Index -->
-                <div class="page" id="p2" style="z-index: 5;">
+                <div class="page" id="p2">
                     <div class="front paper">
                         <div class="inner-page" style="justify-content: center; align-items: center; text-align: center;">
                             <svg width="15cqi" height="7cqi" viewBox="0 0 100 60" fill="var(--brand-mid-blue)" style="margin-bottom: 3%;">
                                 <path d="M10,40 Q25,10 50,20 T90,40 L90,60 L10,60 Z"/>
                             </svg>
-                            <h2 style="font-family: var(--font-compressed); font-size: 6.5cqi; color: var(--brand-dark-blue); line-height: 0.9;">FAMILY<br>RECIPES</h2>
-                            <p style="font-family: var(--font-hand); color: var(--brand-red); font-size: 2.6cqi; margin-top: 2%;">Made with love from the Eastern Cape</p>
+                            <h2 style="font-family: var(--font-compressed); font-size: 8cqi; color: var(--brand-dark-blue); line-height: 0.9;">FAMILY<br>RECIPES</h2>
+                            <p style="font-family: var(--font-hand); color: var(--brand-red); font-size: 3.2cqi; margin-top: 2%;">Made with love from the Eastern Cape</p>
                         </div>
                     </div>
                     
@@ -644,10 +429,10 @@
                 </div>
 
                 <!-- PAGE 3: Graphic Divider & Recipe 1 Image -->
-                <div class="page" id="p3" style="z-index: 4;">
+                <div class="page" id="p3">
                     <div class="front paper">
                         <div class="inner-page" style="justify-content: center; align-items: center; background: #f3f4f6; text-align: center;">
-                            <h2 style="font-family: var(--font-compressed); color: var(--brand-dark-blue); font-size: 5cqi;">Fresh from the farm.<br>Let's get cooking!</h2>
+                            <h2 style="font-family: var(--font-compressed); color: var(--brand-dark-blue); font-size: 6cqi;">Fresh from the farm.<br>Let's get cooking!</h2>
                         </div>
                     </div>
                     <div class="back paper">
@@ -657,7 +442,7 @@
                 </div>
 
                 <!-- PAGE 4: Recipe 1 Text & Recipe 2 Image -->
-                <div class="page" id="p4" style="z-index: 3;">
+                <div class="page" id="p4">
                     <div class="front paper">
                         <div class="inner-page">
                             <div class="recipe-header">
@@ -716,7 +501,7 @@
                 </div>
 
                 <!-- PAGE 5: Recipe 2 Text & Recipe 3 Image -->
-                <div class="page" id="p5" style="z-index: 2;">
+                <div class="page" id="p5">
                     <div class="front paper">
                         <div class="inner-page">
                             <div class="recipe-header">
@@ -760,7 +545,7 @@
                 </div>
 
                 <!-- PAGE 6: Recipe 3 Text & Back Cover -->
-                <div class="page" id="p6" style="z-index: 1;">
+                <div class="page" id="p6">
                     <div class="front recipe-dark hardcover">
                         <div class="inner-page">
                             <div class="recipe-header">
@@ -809,7 +594,7 @@
                             <p style="color:var(--brand-mid-blue); font-weight:bold; margin-bottom: 2%;">PROUDLY SUPPORTING EASTERN CAPE COMMUNITIES</p>
                             <p>HEAD OFFICE<br>Ikhala Road, EL IDZ, Lower Chester Road<br>Sunnyridge, East London</p>
                             <p>P.O. Box 11022, Southernwood<br>East London, 5213</p>
-                            <p style="margin-top: 2%; color:var(--brand-white); font-size: 2.2cqi;">www.sundale.co.za</p>
+                            <p style="margin-top: 2%; color:var(--brand-white); font-size: 2.8cqi;">www.sundale.co.za</p>
                             <p>+27 43 736 6310/1</p>
                         </div>
                     </div>
@@ -830,6 +615,7 @@
         let currentLocation = 1;
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
+        let isTurning = false;
         
         const pages = [];
         for(let i = 1; i <= totalPages; i++) {
@@ -837,39 +623,18 @@
             if(page) pages.push(page);
         }
 
-        // Search logic
-        const recipeIndex = {
-            "biscoff cheesecake": 4,
-            "persian cream cheese log": 5,
-            "vanilla panna cotta": 6
-        };
-
-        function executeSearch() {
-            const inputField = document.getElementById('recipeSearch');
-            const query = inputField.value.toLowerCase().trim();
-            
-            if (!query) return;
-
-            for (const [recipeName, pageNumber] of Object.entries(recipeIndex)) {
-                if (recipeName.includes(query)) {
-                    jumpToPage(pageNumber);
-                    inputField.value = ''; 
-                    inputField.blur(); 
-                    return;
+        function updateZIndexes() {
+            pages.forEach((page, index) => {
+                const pageNum = index + 1;
+                if (page.classList.contains('flipped')) {
+                    page.style.zIndex = pageNum;
+                } else {
+                    page.style.zIndex = totalPages - pageNum + 1;
                 }
-            }
-            
-            alert("Recipe not found. Try searching for 'Cheesecake' or 'Panna Cotta'.");
+            });
         }
 
-        document.getElementById('recipeSearch').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                executeSearch();
-            }
-        });
-
-        // Navigation logic
-        function updateButtons() {
+        function updateBookVisuals() {
             prevBtn.disabled = currentLocation === 1;
             nextBtn.disabled = currentLocation === totalPages + 1;
             
@@ -877,49 +642,75 @@
             if (contentsBtn) {
                 contentsBtn.style.display = currentLocation > 2 ? 'block' : 'none';
             }
+
+            const container = document.getElementById('bookContainer');
+            if (currentLocation === 1) {
+                container.style.transform = 'translateX(-25%)';
+            } else if (currentLocation === totalPages + 1) {
+                container.style.transform = 'translateX(25%)';
+            } else {
+                container.style.transform = 'translateX(0)';
+            }
         }
 
         function flipNextLogic() {
             if (currentLocation <= totalPages) {
                 const pageToFlip = pages[currentLocation - 1];
+                pageToFlip.style.zIndex = 100 + currentLocation;
                 pageToFlip.classList.add('flipped');
                 currentLocation++;
+                
+                setTimeout(() => {
+                    updateZIndexes();
+                }, 800);
             }
         }
 
         function flipPrevLogic() {
             if (currentLocation > 1) {
                 const pageToFlip = pages[currentLocation - 2];
+                pageToFlip.style.zIndex = 100 + currentLocation;
                 pageToFlip.classList.remove('flipped');
                 currentLocation--;
+                
+                setTimeout(() => {
+                    updateZIndexes();
+                }, 800);
             }
         }
 
         function nextPage() {
-            if (currentLocation <= totalPages) {
-                flipNextLogic();
-                updateButtons();
-            }
+            if (isTurning || currentLocation > totalPages) return;
+            isTurning = true;
+            flipNextLogic();
+            updateBookVisuals();
+            setTimeout(() => { isTurning = false; }, 800);
         }
 
         function prevPage() {
-            if (currentLocation > 1) {
-                flipPrevLogic();
-                updateButtons();
-            }
+            if (isTurning || currentLocation <= 1) return;
+            isTurning = true;
+            flipPrevLogic();
+            updateBookVisuals();
+            setTimeout(() => { isTurning = false; }, 800);
         }
         
         function jumpToPage(targetNum) {
+            if (isTurning || currentLocation === targetNum) return;
             while(currentLocation < targetNum) {
-                flipNextLogic();
+                const pageToFlip = pages[currentLocation - 1];
+                pageToFlip.classList.add('flipped');
+                currentLocation++;
             }
             while(currentLocation > targetNum) {
-                flipPrevLogic();
+                const pageToFlip = pages[currentLocation - 2];
+                pageToFlip.classList.remove('flipped');
+                currentLocation--;
             }
-            updateButtons();
+            updateZIndexes();
+            updateBookVisuals();
         }
 
-        // Touch swipe gesture support for tablets and mobile
         let touchStartX = 0;
         let touchEndX = 0;
         let touchStartY = 0;
@@ -942,14 +733,13 @@
             
             if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > 50) {
                 if (xDiff < 0) {
-                    nextPage();
+                    nextPage(); 
                 } else {
-                    prevPage();
+                    prevPage(); 
                 }
             }
         }
 
-        // Image loading error fallback
         document.querySelectorAll('img').forEach(img => {
             img.addEventListener('error', function() {
                 if (!this.src.includes('placehold.co') && !this.classList.contains('brand-logo') && !this.classList.contains('cover-cow')) {
@@ -958,7 +748,10 @@
             });
         });
 
-        updateButtons();
+        // Setup the initial graphics
+        updateZIndexes();
+        updateBookVisuals();
     </script>
 </body>
 </html>
+```
