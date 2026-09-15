@@ -152,12 +152,13 @@
 
         .title-main {
             font-family: var(--font-compressed);
-            font-size: 9cqi;
+            font-size: 7.5cqi;
             font-weight: 700;
             line-height: 0.95;
             text-transform: uppercase;
             text-shadow: 2px 2px 10px rgba(0,0,0,0.4);
             text-align: center;
+            white-space: nowrap;
         }
 
         .community-badge { width: 55%; max-width: 160px; margin-top: auto; margin-bottom: 2%; display: block; z-index: 15; }
@@ -189,11 +190,14 @@
             padding: 2.5% 5.5%;
             font-family: var(--font-condensed);
             font-weight: bold;
-            font-size: 5cqi;
+            font-size: 4.2cqi;
             border-radius: 5px;
             text-transform: uppercase;
             transform: rotate(-3deg);
             box-shadow: 3px 6px 15px rgba(0,0,0,0.4);
+            max-width: 80%;
+            text-align: center;
+            line-height: 1.15;
         }
 
         .mag-layout {
@@ -309,35 +313,58 @@
         .btn:disabled { background-color: rgba(48, 34, 97, 0.4); cursor: not-allowed; transform: none; color: #aaa;}
 
         .page-footer {
-            position: absolute; bottom: 2%; width: 100%; text-align: center;
-            font-family: var(--font-condensed); font-size: 2.4cqi; color: var(--brand-grey); left: 0;
+            position: absolute;
+            bottom: 2%;
+            width: 100%;
+            text-align: center;
+            font-family: var(--font-condensed);
+            font-size: 1.8cqi;
+            color: var(--brand-grey);
+            left: 0;
         }
 
         @media (max-width: 768px) {
             .book-container {
-                height: auto;
-                aspect-ratio: 1.2 / 1; /* Maintained wide ratio to simulate actual open book on mobile */
-                width: 98vw;
-                max-height: 85vh;
+                /* Make the book extremely wide so one page (50%) fills the screen */
+                width: 190vw;
+                height: 86vh;
+                max-width: none;
+                max-height: none;
+                aspect-ratio: unset;
+                /* The JS will handle panning this giant container left and right */
             }
-            .mag-layout { grid-template-columns: 1fr; gap: 5%; overflow-y: auto; padding-bottom: 10px; }
-            .recipe-col { overflow-y: visible; }
+            .stage {
+                overflow: hidden;
+            }
+            .mag-layout {
+                grid-template-columns: 1fr;
+                gap: 5%;
+                overflow-y: auto;
+                padding-bottom: 25px;
+            }
+            .inner-page {
+                padding: 8% 7% 12%; 
+            }
+            .recipe-col {
+                overflow-y: visible;
+            }
             
-            .title-main { font-size: 16cqi; }
-            .recipe-title { font-size: 10cqi; }
-            .recipe-h3 { font-size: 6cqi; }
-            .recipe-list { font-size: 4.8cqi; }
-            .recipe-meta { font-size: 4cqi; }
+            /* Enhanced font sizing for the new full-screen proportions */
+            .title-main { font-size: 13cqi; }
+            .recipe-title { font-size: 9cqi; }
+            .recipe-h3 { font-size: 5cqi; }
+            .recipe-list { font-size: 4cqi; }
+            .recipe-meta { font-size: 3.5cqi; }
             
-            .steps-list li::before { width: 5cqi; height: 5cqi; font-size: 2.8cqi; }
-            .product-info h4 { font-size: 6.5cqi; }
-            .product-info p { font-size: 4.8cqi; }
-            .index-name { font-size: 6.5cqi; }
-            .index-page-num { font-size: 7cqi; }
+            .steps-list li::before { width: 5cqi; height: 5cqi; font-size: 2.5cqi; }
+            .product-info h4 { font-size: 6cqi; }
+            .product-info p { font-size: 4.2cqi; }
+            .index-name { font-size: 6cqi; }
+            .index-page-num { font-size: 6.5cqi; }
             .back-cover-wrap h2 { font-size: 14cqi; }
-            .back-cover-wrap p { font-size: 4.5cqi; }
-            .img-overlay { font-size: 7cqi; }
-            .page-footer { font-size: 4.5cqi; }
+            .back-cover-wrap p { font-size: 4cqi; }
+            .img-overlay { font-size: 5.5cqi; }
+            .page-footer { font-size: 4cqi; }
         }
     </style>
 </head>
@@ -353,7 +380,7 @@
                         <div class="cover-content">
                             <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/sundalelogo.png" alt="Sundale Logo" class="brand-logo" onerror="this.outerHTML='<h2 style=\'font-family:var(--font-compressed); font-size:8.5cqi; color:white; letter-spacing:2px; margin-bottom:2%;\'>Sundale</h2>'">
                             <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/COW.jpg" alt="Grazing Cow" class="cover-cow" onerror="this.style.display='none'">
-                            <h1 class="title-main">Recipe<br>Book</h1>
+                            <h1 class="title-main">Recipe Book</h1>
                             <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Nourishing-Communties.png" alt="Nourishing Communities" class="community-badge">
                         </div>
                         <svg class="milky-wave" viewBox="0 0 1440 320" preserveAspectRatio="none">
@@ -437,7 +464,7 @@
                     </div>
                     <div class="back paper">
                         <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260624_124057.jpg" alt="Biscoff Cheesecake" class="full-img" onerror="this.src='https://placehold.co/800x1000/e5e7eb/302261?text=Biscoff+Cheesecake'">
-                        <div class="img-overlay">Dessert</div>
+                        <div class="img-overlay">Biscoff<br>Cheesecake</div>
                     </div>
                 </div>
 
@@ -496,7 +523,7 @@
                     
                     <div class="back paper">
                         <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260701_111458.jpg" alt="Persian Cream Cheese Log" class="full-img" onerror="this.src='https://placehold.co/800x1000/e5e7eb/302261?text=Cream+Cheese+Log'">
-                        <div class="img-overlay">Appetizer</div>
+                        <div class="img-overlay">Persian Cream<br>Cheese Log</div>
                     </div>
                 </div>
 
@@ -540,7 +567,7 @@
                     
                     <div class="back paper">
                         <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260907_120749.jpg" alt="Vanilla Panna Cotta" class="full-img" onerror="this.src='https://placehold.co/800x1000/e5e7eb/302261?text=Panna+Cotta'">
-                        <div class="img-overlay">Dessert</div>
+                        <div class="img-overlay">Vanilla<br>Panna Cotta</div>
                     </div>
                 </div>
 
@@ -613,14 +640,64 @@
     <script>
         const totalPages = 6; 
         let currentLocation = 1;
+        let isTurning = false;
+        let mobileViewSide = 'right'; // Tracks which side of the open book is visible on mobile
+
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
-        let isTurning = false;
         
         const pages = [];
         for(let i = 1; i <= totalPages; i++) {
             const page = document.getElementById(`p${i}`);
             if(page) pages.push(page);
+        }
+
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+
+        // Keep view in sync if screen is rotated/resized
+        window.addEventListener('resize', () => {
+            if (!isMobile()) mobileViewSide = 'right';
+            updateBookVisuals();
+        });
+
+        function updateButtons() {
+            if (isMobile()) {
+                prevBtn.disabled = (currentLocation === 1 && mobileViewSide === 'right');
+                nextBtn.disabled = (currentLocation === totalPages + 1 && mobileViewSide === 'left');
+            } else {
+                prevBtn.disabled = currentLocation === 1;
+                nextBtn.disabled = currentLocation === totalPages + 1;
+            }
+            
+            const contentsBtn = document.getElementById('contentsBtn');
+            if (contentsBtn) {
+                contentsBtn.style.display = currentLocation > 2 ? 'block' : 'none';
+            }
+        }
+
+        function updateBookVisuals() {
+            updateButtons();
+            const container = document.getElementById('bookContainer');
+            
+            if (isMobile()) {
+                // Pan left/right by 25% of the 190vw container to perfectly center the 95vw pages
+                if (mobileViewSide === 'right') {
+                    container.style.transform = 'translateX(-25%)';
+                } else {
+                    container.style.transform = 'translateX(25%)';
+                }
+            } else {
+                // Standard desktop view centering
+                if (currentLocation === 1) {
+                    container.style.transform = 'translateX(-25%)';
+                } else if (currentLocation === totalPages + 1) {
+                    container.style.transform = 'translateX(25%)';
+                } else {
+                    container.style.transform = 'translateX(0)';
+                }
+            }
         }
 
         function updateZIndexes() {
@@ -634,69 +711,95 @@
             });
         }
 
-        function updateBookVisuals() {
-            prevBtn.disabled = currentLocation === 1;
-            nextBtn.disabled = currentLocation === totalPages + 1;
-            
-            const contentsBtn = document.getElementById('contentsBtn');
-            if (contentsBtn) {
-                contentsBtn.style.display = currentLocation > 2 ? 'block' : 'none';
-            }
-
-            const container = document.getElementById('bookContainer');
-            if (currentLocation === 1) {
-                container.style.transform = 'translateX(-25%)';
-            } else if (currentLocation === totalPages + 1) {
-                container.style.transform = 'translateX(25%)';
-            } else {
-                container.style.transform = 'translateX(0)';
-            }
-        }
-
         function flipNextLogic() {
-            if (currentLocation <= totalPages) {
-                const pageToFlip = pages[currentLocation - 1];
-                pageToFlip.style.zIndex = 100 + currentLocation;
-                pageToFlip.classList.add('flipped');
-                currentLocation++;
-                
-                setTimeout(() => {
-                    updateZIndexes();
-                }, 800);
-            }
+            const pageToFlip = pages[currentLocation - 1];
+            pageToFlip.style.zIndex = 100 + currentLocation;
+            pageToFlip.classList.add('flipped');
+            currentLocation++;
+            setTimeout(updateZIndexes, 800);
         }
 
         function flipPrevLogic() {
-            if (currentLocation > 1) {
-                const pageToFlip = pages[currentLocation - 2];
-                pageToFlip.style.zIndex = 100 + currentLocation;
-                pageToFlip.classList.remove('flipped');
-                currentLocation--;
-                
-                setTimeout(() => {
-                    updateZIndexes();
-                }, 800);
-            }
+            const pageToFlip = pages[currentLocation - 2];
+            pageToFlip.style.zIndex = 100 + currentLocation;
+            pageToFlip.classList.remove('flipped');
+            currentLocation--;
+            setTimeout(updateZIndexes, 800);
         }
 
         function nextPage() {
-            if (isTurning || currentLocation > totalPages) return;
-            isTurning = true;
-            flipNextLogic();
+            if (isTurning) return;
+            
+            if (isMobile()) {
+                if (currentLocation === 1) {
+                    isTurning = true;
+                    flipNextLogic();
+                    mobileViewSide = 'left';
+                } else if (currentLocation === totalPages + 1) {
+                    return; // End of book
+                } else {
+                    if (mobileViewSide === 'left') {
+                        // Pan to right page (No flip needed)
+                        mobileViewSide = 'right';
+                    } else {
+                        // Flip to next page and pan to left page
+                        isTurning = true;
+                        flipNextLogic();
+                        mobileViewSide = 'left';
+                    }
+                }
+            } else {
+                if (currentLocation <= totalPages) {
+                    isTurning = true;
+                    flipNextLogic();
+                }
+            }
+            
             updateBookVisuals();
-            setTimeout(() => { isTurning = false; }, 800);
+            if(isTurning) setTimeout(() => { isTurning = false; }, 800);
         }
 
         function prevPage() {
-            if (isTurning || currentLocation <= 1) return;
-            isTurning = true;
-            flipPrevLogic();
+            if (isTurning) return;
+            
+            if (isMobile()) {
+                if (currentLocation === 1 && mobileViewSide === 'right') {
+                    return; // Start of book
+                } else if (currentLocation === totalPages + 1) {
+                    isTurning = true;
+                    flipPrevLogic();
+                    mobileViewSide = 'right';
+                } else {
+                    if (mobileViewSide === 'right') {
+                        // Pan to left page (No flip needed)
+                        if (currentLocation > 1) mobileViewSide = 'left';
+                    } else {
+                        // Flip to previous page and pan to right page
+                        isTurning = true;
+                        flipPrevLogic();
+                        mobileViewSide = 'right';
+                    }
+                }
+            } else {
+                if (currentLocation > 1) {
+                    isTurning = true;
+                    flipPrevLogic();
+                }
+            }
+            
             updateBookVisuals();
-            setTimeout(() => { isTurning = false; }, 800);
+            if(isTurning) setTimeout(() => { isTurning = false; }, 800);
         }
         
         function jumpToPage(targetNum) {
-            if (isTurning || currentLocation === targetNum) return;
+            if (isTurning || currentLocation === targetNum) {
+                if (isMobile() && mobileViewSide !== 'right') {
+                    mobileViewSide = 'right'; // Ensure we view the text side of the target
+                    updateBookVisuals();
+                }
+                return;
+            }
+            
             while(currentLocation < targetNum) {
                 const pageToFlip = pages[currentLocation - 1];
                 pageToFlip.classList.add('flipped');
@@ -707,6 +810,8 @@
                 pageToFlip.classList.remove('flipped');
                 currentLocation--;
             }
+            
+            mobileViewSide = 'right';
             updateZIndexes();
             updateBookVisuals();
         }
@@ -733,13 +838,14 @@
             
             if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > 50) {
                 if (xDiff < 0) {
-                    nextPage(); 
+                    nextPage();
                 } else {
-                    prevPage(); 
+                    prevPage();
                 }
             }
         }
 
+        // Image loading error fallback
         document.querySelectorAll('img').forEach(img => {
             img.addEventListener('error', function() {
                 if (!this.src.includes('placehold.co') && !this.classList.contains('brand-logo') && !this.classList.contains('cover-cow')) {
@@ -748,7 +854,7 @@
             });
         });
 
-        // Setup the initial graphics
+        // Initialize state
         updateZIndexes();
         updateBookVisuals();
     </script>
