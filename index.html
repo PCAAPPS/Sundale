@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,15 +26,18 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        html, body {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+
         body {
             background: radial-gradient(circle at center, #374151 0%, #111827 100%);
-            height: 100vh;
-            width: 100vw;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: var(--font-condensed);
-            overflow: hidden;
             perspective: 2500px;
         }
 
@@ -323,48 +325,72 @@
             left: 0;
         }
 
-        @media (max-width: 768px) {
-            .book-container {
-                /* Make the book extremely wide so one page (50%) fills the screen */
-                width: 190vw;
-                height: 86vh;
-                max-width: none;
-                max-height: none;
-                aspect-ratio: unset;
-                /* The JS will handle panning this giant container left and right */
+        @media (max-width: 768px), (max-aspect-ratio: 1/1) {
+            body {
+                display: block; /* Override flexbox to prevent centering boxes */
             }
             .stage {
-                overflow: hidden;
+                display: block;
+                position: relative;
+                width: 100vw;
+                height: 100%;
+            }
+            .book-container {
+                /* Explicitly force absolute positioning to lock the pages to the screen edges */
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 200vw !important;
+                height: 100% !important;
+                max-width: none !important;
+                max-height: none !important;
+                aspect-ratio: auto !important;
+                margin: 0 !important;
+                transform-origin: center center !important;
             }
             .mag-layout {
                 grid-template-columns: 1fr;
                 gap: 5%;
                 overflow-y: auto;
-                padding-bottom: 25px;
+                padding-bottom: 20px;
             }
             .inner-page {
-                padding: 8% 7% 12%; 
+                padding: 10% 7% 25%; /* Padded deeply at bottom so text doesn't hit buttons */
+            }
+            .cover-content {
+                padding-bottom: 25%;
             }
             .recipe-col {
                 overflow-y: visible;
             }
             
-            /* Enhanced font sizing for the new full-screen proportions */
-            .title-main { font-size: 13cqi; }
-            .recipe-title { font-size: 9cqi; }
-            .recipe-h3 { font-size: 5cqi; }
-            .recipe-list { font-size: 4cqi; }
-            .recipe-meta { font-size: 3.5cqi; }
+            /* Enhanced fonts to take advantage of the full edge-to-edge screen */
+            .title-main { font-size: 15cqi; }
+            .recipe-title { font-size: 11cqi; }
+            .recipe-h3 { font-size: 6cqi; }
+            .recipe-list { font-size: 4.8cqi; }
+            .recipe-meta { font-size: 4.5cqi; }
             
-            .steps-list li::before { width: 5cqi; height: 5cqi; font-size: 2.5cqi; }
-            .product-info h4 { font-size: 6cqi; }
-            .product-info p { font-size: 4.2cqi; }
-            .index-name { font-size: 6cqi; }
-            .index-page-num { font-size: 6.5cqi; }
-            .back-cover-wrap h2 { font-size: 14cqi; }
-            .back-cover-wrap p { font-size: 4cqi; }
-            .img-overlay { font-size: 5.5cqi; }
-            .page-footer { font-size: 4cqi; }
+            .steps-list li::before { width: 6cqi; height: 6cqi; font-size: 3.5cqi; }
+            .product-info h4 { font-size: 7cqi; }
+            .product-info p { font-size: 5cqi; }
+            .index-name { font-size: 7cqi; }
+            .index-page-num { font-size: 7.5cqi; }
+            .back-cover-wrap h2 { font-size: 16cqi; }
+            .back-cover-wrap p { font-size: 4.5cqi; }
+            .img-overlay { font-size: 6.5cqi; bottom: 10%; right: 5%; }
+            .page-footer { font-size: 4.5cqi; bottom: 4%; }
+            
+            .controls {
+                bottom: 25px !important;
+                width: 100%;
+                justify-content: center;
+                gap: 12px;
+            }
+            .btn {
+                padding: 12px 28px;
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
@@ -653,7 +679,8 @@
         }
 
         function isMobile() {
-            return window.innerWidth <= 768;
+            // Checks for width OR if the phone is held in portrait mode
+            return window.innerWidth <= 768 || window.matchMedia("(max-aspect-ratio: 1/1)").matches;
         }
 
         // Keep view in sync if screen is rotated/resized
@@ -682,11 +709,13 @@
             const container = document.getElementById('bookContainer');
             
             if (isMobile()) {
-                // Pan left/right by 25% of the 190vw container to perfectly center the 95vw pages
+                // With container locked to 200vw width on mobile:
                 if (mobileViewSide === 'right') {
-                    container.style.transform = 'translateX(-25%)';
+                    // Shift the container left by exactly 50% (100vw) to view right page
+                    container.style.transform = 'translateX(-50%)';
                 } else {
-                    container.style.transform = 'translateX(25%)';
+                    // Lock to 0 to view left page
+                    container.style.transform = 'translateX(0%)';
                 }
             } else {
                 // Standard desktop view centering
@@ -860,4 +889,3 @@
     </script>
 </body>
 </html>
-```
