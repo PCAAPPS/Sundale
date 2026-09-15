@@ -5,20 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sundale Recipe Book</title>
+    <!-- Importing Google Fonts to match Colby Compressed/Condensed feel per Sundale Brand Guide -->
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
     <style>
         :root {
-            --brand-dark-blue: #302261;
+            --brand-dark-blue: #302261; /* Pantone 274C */
             --brand-white: #ffffff;
-            --brand-mid-blue: #6b6eb3;
-            --brand-red: #f04e58;
+            --brand-mid-blue: #6b6eb3; /* Pantone 7456C */
+            --brand-red: #f04e58; /* Pantone Red 032C */
             --brand-black: #000000;
             --brand-grey: #b2bcce;
             
-            /* Typography emulation based on branding guide */
-            --font-compressed: 'Colby Compressed', 'Oswald', sans-serif;
-            --font-condensed: 'Colby Condensed', 'Oswald', sans-serif;
-            --font-hand: 'Colby', 'Patrick Hand', cursive;
+            --font-compressed: 'Oswald', sans-serif;
+            --font-condensed: 'Oswald', sans-serif;
+            --font-hand: 'Patrick Hand', cursive;
         }
 
         * {
@@ -29,7 +29,6 @@
         }
 
         body {
-            /* Professional studio lighting background */
             background: radial-gradient(circle at center, #374151 0%, #111827 100%);
             height: 100vh;
             display: flex;
@@ -51,7 +50,6 @@
 
         .book-container {
             position: relative;
-            /* 4:5 Magazine Ratio - Scaled up for maximum visibility */
             height: 85vh; 
             max-width: 92vw;
             aspect-ratio: 4 / 5;
@@ -77,7 +75,7 @@
             transform-style: preserve-3d;
             transition: transform 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
             background-color: var(--brand-white);
-            border-radius: 3px 12px 12px 3px;
+            border-radius: 4px 14px 14px 4px;
         }
 
         .front, .back {
@@ -90,34 +88,33 @@
             -webkit-backface-visibility: hidden;
             overflow: hidden;
             background-color: var(--brand-white);
-            border-radius: 3px 12px 12px 3px;
+            border-radius: 4px 14px 14px 4px;
+            container-type: inline-size;
         }
 
         .back {
             transform: rotateY(180deg);
-            border-radius: 12px 3px 3px 12px;
+            border-radius: 14px 4px 4px 14px;
         }
 
         .flipped {
             transform: rotateY(-180deg);
         }
 
-        /* Hardcover Styling */
         .hardcover .front {
-            background-color: var(--brand-dark-blue);
+            background-color: var(--brand-dark-blue) !important;
             box-shadow: inset 10px 0px 20px rgba(0,0,0,0.6), inset -3px 0px 8px rgba(255,255,255,0.1);
             border-radius: 4px 14px 14px 4px;
-            border-left: 8px solid #1a1236; /* Spine */
+            border-left: 8px solid #1a1236;
         }
         
         .hardcover .back {
-            background-color: var(--brand-dark-blue);
+            background-color: var(--brand-dark-blue) !important;
             box-shadow: inset -10px 0px 20px rgba(0,0,0,0.6), inset 3px 0px 8px rgba(255,255,255,0.1);
             border-radius: 14px 4px 4px 14px;
-            border-right: 8px solid #1a1236; /* Spine inside */
+            border-right: 8px solid #1a1236;
         }
 
-        /* Paper Styling */
         .paper .front {
             background: linear-gradient(to right, #e5e7eb 0%, #ffffff 4%, #ffffff 100%);
             box-shadow: inset -1px 0px 4px rgba(0,0,0,0.1);
@@ -129,7 +126,7 @@
 
         .inner-page {
             container-type: inline-size;
-            padding: 8%;
+            padding: 7%;
             height: 100%;
             display: flex;
             flex-direction: column;
@@ -143,29 +140,38 @@
             align-items: center;
             justify-content: flex-start;
             height: 100%;
-            padding: 15% 5%;
+            padding: 6% 5%;
             color: var(--brand-white);
             position: relative;
             z-index: 10;
         }
 
         .brand-logo {
-            width: 55%;
-            max-width: 300px;
-            margin-bottom: 8%;
+            width: 38%;
+            max-width: 140px;
+            margin-bottom: 2%;
             display: block;
         }
 
-        /* Restored original elegant font sizing */
+        .cover-cow {
+            width: 38% !important;
+            max-width: 140px;
+            margin-bottom: 3%;
+            border-radius: 8px;
+            background-color: #ffffff;
+            padding: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: block !important;
+        }
+
         .title-main {
             font-family: var(--font-compressed);
-            font-size: 13cqi;
+            font-size: 7.5cqi;
             font-weight: 700;
             line-height: 0.95;
             text-transform: uppercase;
             text-shadow: 2px 2px 10px rgba(0,0,0,0.4);
             text-align: center;
-            margin-top: 5%;
         }
 
         .milky-wave {
@@ -195,7 +201,7 @@
             padding: 2% 5%;
             font-family: var(--font-condensed);
             font-weight: bold;
-            font-size: 4.5cqi;
+            font-size: 3.5cqi;
             border-radius: 5px;
             text-transform: uppercase;
             transform: rotate(-3deg);
@@ -205,20 +211,20 @@
         .mag-layout {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 5%;
+            gap: 4%;
             flex-grow: 1;
         }
 
         .recipe-header {
             grid-column: 1 / -1;
             border-bottom: 2px solid var(--brand-dark-blue);
-            padding-bottom: 3%;
-            margin-bottom: 4%;
+            padding-bottom: 2%;
+            margin-bottom: 3%;
         }
 
         .recipe-title {
             font-family: var(--font-compressed);
-            font-size: 9cqi;
+            font-size: 5cqi;
             color: var(--brand-dark-blue);
             text-transform: uppercase;
             line-height: 1;
@@ -227,7 +233,7 @@
         .recipe-meta {
             font-family: var(--font-hand);
             color: var(--brand-red);
-            font-size: 3.5cqi;
+            font-size: 2.3cqi;
             margin-top: 1%;
         }
 
@@ -238,7 +244,7 @@
 
         .ingredients-box {
             background-color: rgba(107, 110, 179, 0.1);
-            padding: 8%;
+            padding: 5%;
             border-radius: 8px;
             height: 100%;
         }
@@ -246,25 +252,25 @@
         .recipe-h3 {
             font-family: var(--font-condensed);
             color: var(--brand-dark-blue);
-            font-size: 5cqi;
-            margin-bottom: 5%;
+            font-size: 3cqi;
+            margin-bottom: 3%;
             text-transform: uppercase;
         }
 
         .recipe-list {
             list-style-type: none;
             font-family: var(--font-condensed);
-            font-size: 3.2cqi;
-            line-height: 1.4;
+            font-size: 2cqi;
+            line-height: 1.35;
         }
 
         .recipe-list li {
-            margin-bottom: 5%;
+            margin-bottom: 2.5%;
             position: relative;
         }
 
         .ingredients-list li {
-            padding-left: 8%;
+            padding-left: 6%;
         }
         
         .ingredients-list li::before {
@@ -280,8 +286,8 @@
         }
 
         .steps-list li {
-            padding-left: 15%;
-            margin-bottom: 6%;
+            padding-left: 9%;
+            margin-bottom: 3%;
         }
 
         .steps-list li::before {
@@ -292,22 +298,22 @@
             top: 0;
             background-color: var(--brand-dark-blue);
             color: white;
-            width: 4.5cqi;
-            height: 4.5cqi;
+            width: 2.5cqi;
+            height: 2.5cqi;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: var(--font-compressed);
-            font-size: 2.8cqi;
+            font-size: 1.6cqi;
         }
 
         .dairy-range {
             display: flex;
             flex-direction: column;
-            gap: 4%;
+            gap: 2.5%;
             flex-grow: 1;
-            margin-top: 2%;
+            margin-top: 1%;
         }
 
         .product-item {
@@ -315,35 +321,35 @@
             align-items: center;
             background: #ffffff;
             border-radius: 8px;
-            padding: 4%;
+            padding: 2%;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
         .product-item img {
-            width: 25%;
+            width: 18%;
             height: auto;
-            margin-right: 5%;
+            margin-right: 4%;
             border-radius: 4px;
         }
 
         .product-info h4 {
             font-family: var(--font-compressed);
             color: var(--brand-dark-blue);
-            font-size: 5.5cqi;
+            font-size: 3.2cqi;
             text-transform: uppercase;
             margin-bottom: 1%;
         }
 
         .product-info p {
             font-family: var(--font-condensed);
-            font-size: 3.2cqi;
+            font-size: 2.1cqi;
             color: #4b5563;
             line-height: 1.2;
         }
 
         .index-list {
             list-style: none;
-            margin-top: 5%;
+            margin-top: 3%;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -354,7 +360,7 @@
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            margin-bottom: 6%;
+            margin-bottom: 4%;
             border-bottom: 2px dotted var(--brand-grey);
             cursor: pointer;
             transition: color 0.2s;
@@ -363,18 +369,17 @@
         .index-item:hover { color: var(--brand-red); }
         .index-name {
             font-family: var(--font-condensed);
-            font-size: 4.8cqi;
+            font-size: 3.2cqi;
             font-weight: bold;
             color: var(--brand-dark-blue);
             text-transform: uppercase;
         }
         .index-page-num {
             font-family: var(--font-compressed);
-            font-size: 6.5cqi;
+            font-size: 4cqi;
             color: var(--brand-red);
         }
 
-        /* Back Cover Styling */
         .back-cover-wrap {
             container-type: inline-size;
             display: flex;
@@ -384,21 +389,21 @@
             height: 100%;
             text-align: center;
             color: white;
-            padding: 10%;
+            padding: 8%;
         }
         
         .back-cover-wrap h2 {
             font-family: var(--font-compressed);
-            font-size: 12cqi;
-            margin-bottom: 8%;
+            font-size: 8cqi;
+            margin-bottom: 4%;
             color: var(--brand-white);
         }
 
         .back-cover-wrap p {
             font-family: var(--font-condensed);
-            font-size: 3.5cqi;
+            font-size: 2.4cqi;
             color: var(--brand-grey);
-            margin-bottom: 4%;
+            margin-bottom: 2.5%;
         }
 
         .recipe-dark {
@@ -413,7 +418,7 @@
 
         .controls {
             position: absolute;
-            bottom: 20px;
+            bottom: 15px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -425,9 +430,9 @@
             background-color: var(--brand-dark-blue);
             color: white;
             border: 1px solid rgba(255,255,255,0.2);
-            padding: 10px 25px;
+            padding: 8px 22px;
             font-family: var(--font-condensed);
-            font-size: 1rem;
+            font-size: 0.9rem;
             border-radius: 30px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
@@ -439,7 +444,7 @@
 
         .btn:hover:not(:disabled) { background-color: var(--brand-mid-blue); transform: translateY(-2px); }
         .btn:active:not(:disabled) { transform: translateY(1px); }
-        .btn:disabled { background-color: rgba(48, 34, 97, 0.5); cursor: not-allowed; transform: none; color: #aaa;}
+        .btn:disabled { background-color: rgba(48, 34, 97, 0.4); cursor: not-allowed; transform: none; color: #aaa;}
 
         .page-footer {
             position: absolute;
@@ -447,7 +452,7 @@
             width: 100%;
             text-align: center;
             font-family: var(--font-condensed);
-            font-size: 3cqi;
+            font-size: 2.2cqi;
             color: var(--brand-grey);
             left: 0;
         }
@@ -459,25 +464,24 @@
         <div class="book-container" id="bookContainer">
             <div class="book" id="book">
                 
-                <!-- PAGE 1: Front Cover / Our Dairy Range (Left Side inside) -->
                 <div class="page hardcover" id="p1">
-                    <!-- Right Side: Front Cover -->
-                    <div class="front">
+                    <div class="front" style="background-color: var(--brand-dark-blue);">
                         <div class="cover-content">
-                            <!-- Official Logo -->
-                            <img src="https://kommodo.ai/i/8Q6EMGv5b6fNGNXz13x8" alt="Sundale Logo" class="brand-logo">
-                            <h1 class="title-main">Dairy<br>Recipes</h1>
+                            <!-- Official Sundale Logo with raw GitHub URL and fallback -->
+                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/sundalelogo.png" alt="Sundale Logo" class="brand-logo" onerror="this.outerHTML='<h2 style=\'font-family:var(--font-compressed); font-size:8cqi; color:white; letter-spacing:2px; margin-bottom:3%;\'>Sundale</h2>'">
+                            <!-- Grazing Jersey Cow Graphic -->
+                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/COW.jpg" alt="Grazing Cow" class="cover-cow" onerror="this.style.display='none'">
+                            <h1 class="title-main">Recipe<br>Book</h1>
                         </div>
                         <svg class="milky-wave" viewBox="0 0 1440 320" preserveAspectRatio="none">
                             <path fill="#ffffff" fill-opacity="1" d="M0,224L48,224C96,224,192,224,288,202.7C384,181,480,139,576,149.3C672,160,768,224,864,229.3C960,235,1056,181,1152,144C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
                         </svg>
                     </div>
                     
-                    <!-- Left Side (when open): Our Dairy Range -->
                     <div class="back">
                         <div class="inner-page">
                             <div class="recipe-header">
-                                <h1 class="recipe-title" style="color: var(--brand-white);">Our Range</h1>
+                                <h1 class="recipe-title" style="color: var(--brand-dark-blue);">Our Range</h1>
                             </div>
                             <div class="dairy-range">
                                 <div class="product-item">
@@ -506,229 +510,172 @@
                     </div>
                 </div>
 
-                <!-- PAGE 2: Contents Index / Family Recipes Intro -->
                 <div class="page paper" id="p2">
-                    <!-- Right Side: Contents Index -->
                     <div class="front">
+                        <div class="inner-page" style="justify-content: center; align-items: center; text-align: center;">
+                            <svg width="15cqi" height="8cqi" viewBox="0 0 100 60" fill="var(--brand-mid-blue)" style="margin-bottom: 3%;">
+                                <path d="M10,40 Q25,10 50,20 T90,40 L90,60 L10,60 Z"/>
+                            </svg>
+                            <h2 style="font-family: var(--font-compressed); font-size: 7.5cqi; color: var(--brand-dark-blue); line-height: 0.9;">FAMILY<br>RECIPES</h2>
+                            <p style="font-family: var(--font-hand); color: var(--brand-red); font-size: 3cqi; margin-top: 3%;">Made with love from the Eastern Cape</p>
+                        </div>
+                    </div>
+                    
+                    <div class="back">
                         <div class="inner-page">
                             <div class="recipe-header">
                                 <h1 class="recipe-title">Contents</h1>
                             </div>
                             <ul class="index-list">
                                 <li class="index-item" onclick="jumpToPage(4)">
-                                    <span class="index-name">Fluffy Pancakes</span>
+                                    <span class="index-name">Biscoff Cheesecake</span>
                                     <span class="index-page-num">01</span>
                                 </li>
                                 <li class="index-item" onclick="jumpToPage(5)">
-                                    <span class="index-name">Garlic Pasta</span>
+                                    <span class="index-name">Persian Cream Cheese Log</span>
                                     <span class="index-page-num">02</span>
                                 </li>
                                 <li class="index-item" onclick="jumpToPage(6)">
-                                    <span class="index-name">Malva Pudding</span>
+                                    <span class="index-name">Vanilla Panna Cotta</span>
                                     <span class="index-page-num">03</span>
-                                </li>
-                                <li class="index-item" onclick="jumpToPage(7)">
-                                    <span class="index-name">Creamy Chicken</span>
-                                    <span class="index-page-num">04</span>
                                 </li>
                             </ul>
                         </div>
                     </div>
-                    
-                    <!-- Left Side (when open): Family Recipes Intro -->
-                    <div class="back">
-                        <div class="inner-page" style="justify-content: center; align-items: center; text-align: center;">
-                            <svg width="20cqi" height="12cqi" viewBox="0 0 100 60" fill="var(--brand-mid-blue)" style="margin-bottom: 5%;">
-                                <path d="M10,40 Q25,10 50,20 T90,40 L90,60 L10,60 Z"/>
-                            </svg>
-                            <h2 style="font-family: var(--font-compressed); font-size: 11cqi; color: var(--brand-dark-blue); line-height: 0.9;">FAMILY<br>RECIPES</h2>
-                            <p style="font-family: var(--font-hand); color: var(--brand-red); font-size: 4.5cqi; margin-top: 5%;">Made with love from the Eastern Cape</p>
-                        </div>
-                    </div>
                 </div>
 
-                <!-- PAGE 3: Graphic Divider / Recipe 1 Image -->
                 <div class="page paper" id="p3">
-                    <!-- Right Side: Graphic Divider before recipes start -->
                     <div class="front">
-                        <div class="inner-page" style="justify-content: center; align-items: center; background: #f3f4f6;">
-                            <img src="https://kommodo.ai/i/8Q6EMGv5b6fNGNXz13x8" alt="Sundale Logo" style="width: 40%; opacity: 0.1; filter: grayscale(1);">
-                            <h2 style="font-family: var(--font-compressed); color: var(--brand-dark-blue); font-size: 9cqi; text-align: center; margin-top: 8%;">Fresh from the farm.<br>Let's get cooking!</h2>
+                        <div class="inner-page" style="justify-content: center; align-items: center; background: #f3f4f6; text-align: center;">
+                            <h2 style="font-family: var(--font-compressed); color: var(--brand-dark-blue); font-size: 6cqi;">Fresh from the farm.<br>Let's get cooking!</h2>
                         </div>
                     </div>
-                    <!-- Left Side (when open): Recipe 1 Image -->
                     <div class="back">
-                        <img src="https://images.unsplash.com/photo-1528207776546-384cb1119b27?auto=format&fit=crop&q=80&w=800" alt="Pancakes" class="full-img">
-                        <div class="img-overlay">Breakfast</div>
+                        <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260624_124057.jpg" alt="Biscoff Cheesecake" class="full-img">
+                        <div class="img-overlay">Dessert</div>
                     </div>
                 </div>
 
-                <!-- PAGE 4: Recipe 1 Text / Recipe 2 Image -->
                 <div class="page paper" id="p4">
-                    <!-- Right Side: Recipe 1 Text -->
                     <div class="front">
                         <div class="inner-page">
                             <div class="recipe-header">
-                                <h1 class="recipe-title">Fluffy Pancakes</h1>
-                                <div class="recipe-meta">Prep: 10 mins | Cook: 15 mins</div>
+                                <h1 class="recipe-title">Biscoff Cheesecake</h1>
+                                <div class="recipe-meta">Prep: 20 mins | Chill: 4 hours</div>
                             </div>
                             <div class="mag-layout">
                                 <div class="recipe-col ingredients-box">
                                     <h3 class="recipe-h3">Ingredients</h3>
                                     <ul class="recipe-list ingredients-list">
-                                        <li>1 cup Sundale Milk</li>
-                                        <li>1.5 cups flour</li>
-                                        <li>3 tsp baking powder</li>
-                                        <li>1 tbsp sugar</li>
-                                        <li>1 egg</li>
-                                        <li>3 tbsp Sundale butter</li>
+                                        <li>250g Biscoff cookies, crushed</li>
+                                        <li>100g Sundale Butter, melted</li>
+                                        <li>500g Cream cheese, softened</li>
+                                        <li>1/2 cup Sundale Double Greek Yoghurt</li>
+                                        <li>1 cup Biscoff spread</li>
+                                        <li>1 tsp Vanilla extract</li>
                                     </ul>
                                 </div>
                                 <div class="recipe-col">
                                     <h3 class="recipe-h3">Method</h3>
                                     <ul class="recipe-list steps-list">
-                                        <li>Sift dry ingredients.</li>
-                                        <li>Whisk milk, egg, and melted butter.</li>
-                                        <li>Fold wet into dry gently.</li>
-                                        <li>Pour portions onto pan.</li>
-                                        <li>Flip when bubbles pop.</li>
+                                        <li>Mix crushed cookies with melted Sundale butter and press into base.</li>
+                                        <li>Beat cream cheese, Sundale double Greek yoghurt, and vanilla until smooth.</li>
+                                        <li>Fold in melted Biscoff spread gently.</li>
+                                        <li>Pour mixture over the prepared crust.</li>
+                                        <li>Chill in the refrigerator for at least 4 hours before serving.</li>
                                     </ul>
                                 </div>
                             </div>
                             <div class="page-footer">01</div>
                         </div>
                     </div>
-                    <!-- Left Side (when open): Recipe 2 Image -->
+                    
                     <div class="back">
-                        <img src="https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&q=80&w=800" alt="Pasta" class="full-img">
-                        <div class="img-overlay">Dinner</div>
+                        <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260701_111458.jpg" alt="Persian Cream Cheese Log" class="full-img">
+                        <div class="img-overlay">Appetizer</div>
                     </div>
                 </div>
 
-                <!-- PAGE 5: Recipe 2 Text / Recipe 3 Image -->
                 <div class="page paper" id="p5">
-                    <!-- Right Side: Recipe 2 Text -->
                     <div class="front">
                         <div class="inner-page">
                             <div class="recipe-header">
-                                <h1 class="recipe-title">Garlic Pasta</h1>
-                                <div class="recipe-meta">Prep: 5 mins | Cook: 12 mins</div>
+                                <h1 class="recipe-title">Persian Cream Cheese Log</h1>
+                                <div class="recipe-meta">Prep: 15 mins</div>
                             </div>
                             <div class="mag-layout">
                                 <div class="recipe-col ingredients-box">
                                     <h3 class="recipe-h3">Ingredients</h3>
                                     <ul class="recipe-list ingredients-list">
-                                        <li>1/2 cup Sundale Milk</li>
-                                        <li>250g Pasta</li>
-                                        <li>4 cloves garlic</li>
-                                        <li>2 tbsp Sundale Butter</li>
-                                        <li>1/4 cup Parmesan</li>
+                                        <li>400g Cream cheese</li>
+                                        <li>2 tbsp Sundale Butter, softened</li>
+                                        <li>1/2 cup Pistachios, chopped</li>
+                                        <li>1/4 cup Dried cranberries, chopped</li>
+                                        <li>1 tbsp Fresh herbs (parsley/mint)</li>
+                                        <li>Pinch of salt and black pepper</li>
                                     </ul>
                                 </div>
                                 <div class="recipe-col">
                                     <h3 class="recipe-h3">Method</h3>
                                     <ul class="recipe-list steps-list">
-                                        <li>Boil pasta in water.</li>
-                                        <li>Sauté garlic in butter.</li>
-                                        <li>Stir in milk & simmer.</li>
-                                        <li>Toss pasta in sauce.</li>
-                                        <li>Top with cheese.</li>
+                                        <li>In a bowl, mix cream cheese and softened Sundale butter until creamy.</li>
+                                        <li>Shape the mixture into a neat log using parchment paper.</li>
+                                        <li>Roll the log in chopped pistachios, cranberries, and fresh herbs.</li>
+                                        <li>Wrap tightly and refrigerate for 2 hours to firm up.</li>
+                                        <li>Serve chilled with crackers and warm bread.</li>
                                     </ul>
                                 </div>
                             </div>
                             <div class="page-footer">02</div>
                         </div>
                     </div>
-                    <!-- Left Side (when open): Recipe 3 Image -->
+                    
                     <div class="back">
-                        <img src="https://images.unsplash.com/photo-1587314168485-3236d6710814?auto=format&fit=crop&q=80&w=800" alt="Pudding" class="full-img">
+                        <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260907_120749.jpg" alt="Vanilla Panna Cotta" class="full-img">
                         <div class="img-overlay">Dessert</div>
                     </div>
                 </div>
 
-                <!-- PAGE 6: Recipe 3 Text / Recipe 4 Image -->
-                <div class="page paper" id="p6">
-                    <!-- Right Side: Recipe 3 Text (Dark Mode) -->
+                <div class="page hardcover" id="p6">
                     <div class="front recipe-dark">
                         <div class="inner-page">
                             <div class="recipe-header">
-                                <h1 class="recipe-title">Malva Pudding</h1>
-                                <div class="recipe-meta" style="color:var(--brand-grey)">Prep: 15 mins | Bake: 45 mins</div>
+                                <h1 class="recipe-title">Vanilla Panna Cotta</h1>
+                                <div class="recipe-meta" style="color:var(--brand-grey)">Prep: 15 mins | Chill: 3 hours</div>
                             </div>
                             <div class="mag-layout">
                                 <div class="recipe-col ingredients-box">
                                     <h3 class="recipe-h3">Ingredients</h3>
                                     <ul class="recipe-list ingredients-list">
-                                        <li>1/2 cup Sundale Milk</li>
-                                        <li>1 cup Sugar & 1 Egg</li>
-                                        <li>1 tbsp Apricot Jam</li>
-                                        <li>1 cup Flour</li>
-                                        <li>1 tsp Baking Soda</li>
+                                        <li>1.5 cups Sundale Fresh Milk</li>
+                                        <li>1.5 cups Heavy cream</li>
+                                        <li>1/3 cup Sugar</li>
+                                        <li>2 tsp Gelatin powder</li>
+                                        <li>1 Vanilla bean, split</li>
                                     </ul>
                                 </div>
                                 <div class="recipe-col">
                                     <h3 class="recipe-h3">Method</h3>
                                     <ul class="recipe-list steps-list">
-                                        <li>Beat egg, sugar and jam.</li>
-                                        <li>Sift dry ingredients.</li>
-                                        <li>Fold alternating with milk.</li>
-                                        <li>Bake at 180°C for 45m.</li>
-                                        <li>Pour hot sauce over.</li>
+                                        <li>Sprinkle gelatin over 3 tbsp cold Sundale milk and let bloom.</li>
+                                        <li>In a saucepan, heat cream, sugar, and vanilla bean until warm.</li>
+                                        <li>Whisk in the dissolved gelatin until completely melted.</li>
+                                        <li>Pour into molds and chill for 3 hours until set.</li>
+                                        <li>Unmold onto plates and garnish with fresh berries.</li>
                                     </ul>
                                 </div>
                             </div>
                             <div class="page-footer" style="color:var(--brand-mid-blue)">03</div>
                         </div>
                     </div>
-                    <!-- Left Side (when open): Recipe 4 Image -->
-                    <div class="back">
-                        <img src="https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&q=80&w=800" alt="Chicken" class="full-img">
-                        <div class="img-overlay">Main</div>
-                    </div>
-                </div>
-
-                <!-- PAGE 7: Recipe 4 Text / Back Cover -->
-                <div class="page hardcover" id="p7">
-                    <!-- Right Side: Recipe 4 Text -->
-                    <div class="front">
-                        <div class="inner-page">
-                            <div class="recipe-header">
-                                <h1 class="recipe-title">Creamy Chicken</h1>
-                                <div class="recipe-meta">Prep: 10 mins | Cook: 20 mins</div>
-                            </div>
-                            <div class="mag-layout">
-                                <div class="recipe-col ingredients-box">
-                                    <h3 class="recipe-h3">Ingredients</h3>
-                                    <ul class="recipe-list ingredients-list">
-                                        <li>3/4 cup Sundale Milk</li>
-                                        <li>2 Chicken Breasts</li>
-                                        <li>1 cup Mushrooms</li>
-                                        <li>1 tbsp Sundale Butter</li>
-                                        <li>1 tsp Mixed Herbs</li>
-                                    </ul>
-                                </div>
-                                <div class="recipe-col">
-                                    <h3 class="recipe-h3">Method</h3>
-                                    <ul class="recipe-list steps-list">
-                                        <li>Sear chicken in butter.</li>
-                                        <li>Remove and sauté veg.</li>
-                                        <li>Add milk, herbs, simmer.</li>
-                                        <li>Return chicken to thicken.</li>
-                                        <li>Serve hot.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="page-footer">04</div>
-                        </div>
-                    </div>
-                    <!-- Left Side (when open): Back Cover (Contact Info) -->
-                    <div class="back">
+                    
+                    <div class="back" style="background-color: var(--brand-dark-blue);">
                         <div class="back-cover-wrap">
                             <h2>Sundale</h2>
-                            <p style="color:var(--brand-mid-blue); font-weight:bold; margin-bottom: 5%;">PROUDLY SUPPORTING EASTERN CAPE COMMUNITIES</p>
+                            <p style="color:var(--brand-mid-blue); font-weight:bold; margin-bottom: 4%;">PROUDLY SUPPORTING EASTERN CAPE COMMUNITIES</p>
                             <p>HEAD OFFICE<br>Ikhala Road, EL IDZ, Lower Chester Road<br>Sunnyridge, East London</p>
                             <p>P.O. Box 11022, Southernwood<br>East London, 5213</p>
-                            <p style="margin-top: 10%; color:var(--brand-white); font-size: 4cqi;">www.sundale.co.za</p>
+                            <p style="margin-top: 5%; color:var(--brand-white); font-size: 3cqi;">www.sundale.co.za</p>
                             <p>+27 43 736 6310/1</p>
                         </div>
                     </div>
@@ -744,7 +691,7 @@
     </div>
 
     <script>
-        const totalPages = 7; 
+        const totalPages = 6; 
         let currentLocation = 1;
         const bookContainer = document.getElementById('bookContainer');
         const prevBtn = document.getElementById('prevBtn');
@@ -768,7 +715,6 @@
         }
 
         function updateCenter() {
-            // Centers the book when closed on front cover, open in middle, or closed on back cover
             if (currentLocation === 1) {
                 bookContainer.style.transform = 'translateX(25%)';
             } else if (currentLocation === totalPages + 1) {
@@ -793,7 +739,7 @@
                 pageToFlip.classList.remove('flipped');
                 setTimeout(() => {
                     pageToFlip.style.zIndex = totalPages - (currentLocation - 2);
-                }, 300); // Wait for transition before resetting z-index
+                }, 300);
                 currentLocation--;
             }
         }
@@ -815,7 +761,6 @@
         }
         
         function jumpToPage(targetNum) {
-            // Logic to fast forward pages until we hit the target
             if(targetNum > currentLocation) {
                 while(currentLocation < targetNum) {
                     flipNextLogic();
@@ -825,19 +770,14 @@
             }
         }
 
-        // Automatic fallback for strict browsers that block Unsplash placeholder images
         document.querySelectorAll('img').forEach(img => {
             img.addEventListener('error', function() {
-                if (this.classList.contains('brand-logo')) {
-                    // Replaces the broken icon with a stylized font logo if image is blocked
-                    this.outerHTML = '<h2 style="font-family: var(--font-hand); font-size: 15cqi; color: white; margin-bottom: 8%; letter-spacing: 2px;">Sundale</h2>';
-                } else if (!this.src.includes('placehold.co')) {
+                if (!this.src.includes('placehold.co') && !this.classList.contains('brand-logo') && !this.classList.contains('cover-cow')) {
                     this.src = `https://placehold.co/800x1000/e5e7eb/302261?text=${encodeURIComponent(this.alt || 'Image')}`;
                 }
             });
         });
 
-        // Initialize state
         initZIndexes();
         updateCenter();
         updateButtons();
