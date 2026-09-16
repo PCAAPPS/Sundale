@@ -1,878 +1,785 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Sundale Recipe Book</title>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --brand-dark-blue: #302261;
-            --brand-white: #ffffff;
-            --brand-mid-blue: #6b6eb3;
-            --brand-red: #f04e58;
-            --brand-black: #000000;
-            --brand-grey: #b2bcce;
-            
-            --font-compressed: 'Oswald', sans-serif;
-            --font-condensed: 'Oswald', sans-serif;
-            --font-hand: 'Patrick Hand', cursive;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        html, body {
-            width: 100%;
-            /* Use dynamic viewport height to fix mobile toolbar cut-offs */
-            height: 100dvh;
-            /* Prevent pull-to-refresh and bounce effects on mobile */
-            overscroll-behavior-y: none;
-            touch-action: pan-x pan-y;
-            overflow: hidden;
-            background: radial-gradient(circle at center, #374151 0%, #111827 100%);
-            font-family: var(--font-condensed);
-        }
-
-        .stage {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            /* Respect device notches and safe areas */
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-        }
-
-        .book-viewport {
-            position: relative;
-            /* Desktop strictly bound to 1.6:1 (Two 4:5 pages side-by-side) */
-            width: 92vw;
-            height: calc(92vw / 1.6);
-            max-width: calc(82vh * 1.6);
-            max-height: 82vh;
-            perspective: 2500px;
-            margin-bottom: 4vh; 
-        }
-        
-        @media (min-aspect-ratio: 1.6) {
-            .book-viewport {
-                height: 82vh;
-                width: calc(82vh * 1.6);
-            }
-        }
-
-        .book-container {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            transform-style: preserve-3d;
-            transition: transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1);
-        }
-
-        .book {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transform-style: preserve-3d;
-        }
-
-        .page {
-            width: 50%;
-            height: 100%;
-            position: absolute;
-            right: 0;
-            top: 0;
-            transform-origin: left center; 
-            transform-style: preserve-3d;
-            transition: transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1);
-            background-color: var(--brand-white);
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.05), 5px 5px 15px rgba(0,0,0,0.15);
-        }
-
-        .page.flipped {
-            transform: rotateY(-180deg);
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.05), -5px 5px 15px rgba(0,0,0,0.15);
-        }
-
-        .front, .back {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-            overflow: hidden;
-            background-color: var(--brand-white);
-            container-type: inline-size;
-        }
-
-        .back { transform: rotateY(180deg); }
-
-        .hardcover .front, .hardcover .back {
-            background-color: var(--brand-dark-blue) !important;
-            box-shadow: inset 15px 0px 30px rgba(0,0,0,0.5);
-        }
-        .page.flipped .hardcover .front, .page.flipped .hardcover .back {
-            box-shadow: inset -15px 0px 30px rgba(0,0,0,0.5);
-        }
-        .paper .front { background: linear-gradient(to right, #e5e7eb 0%, #ffffff 5%, #ffffff 100%); }
-        .paper .back { background: linear-gradient(to left, #e5e7eb 0%, #ffffff 5%, #ffffff 100%); }
-
-        .inner-page {
-            container-type: inline-size;
-            padding: 6%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-        }
-
-        .cover-content {
-            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-            height: 90%; padding: 6% 5%; color: var(--brand-white); position: relative; z-index: 10;
-        }
-
-        .brand-logo { width: 38%; max-width: 130px; display: block; }
-        .cover-cow { width: 36% !important; max-width: 120px; border-radius: 8px; background-color: #ffffff; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: block !important; }
-
-        .title-main {
-            font-family: var(--font-compressed); font-size: 7cqi; font-weight: 700;
-            line-height: 0.95; text-transform: uppercase; text-shadow: 2px 2px 10px rgba(0,0,0,0.4);
-            text-align: center; white-space: nowrap; margin: 4% 0;
-        }
-
-        .community-badge { width: 55%; max-width: 160px; display: block; z-index: 15; }
-        .milky-wave { position: absolute; bottom: 0; left: 0; width: 100%; height: auto; z-index: 1; }
-        .full-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-        
-        .img-overlay {
-            position: absolute; bottom: 6%; right: 6%; background: var(--brand-red); color: white;
-            padding: 2.5% 5.5%; font-family: var(--font-condensed); font-weight: bold; font-size: 4.2cqi;
-            border-radius: 5px; text-transform: uppercase; transform: rotate(-3deg);
-            box-shadow: 3px 6px 15px rgba(0,0,0,0.4); max-width: 80%; text-align: center; line-height: 1.15;
-        }
-
-        .mag-layout {
-            display: grid;
-            grid-template-columns: 1fr 1.15fr;
-            gap: 4%;
-            flex: 1;
-            min-height: 0;
-            overflow: hidden;
-        }
-        
-        .recipe-col { 
-            display: flex; flex-direction: column; justify-content: space-between;
-            overflow-y: auto; padding-right: 6px; 
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .recipe-col::-webkit-scrollbar { display: none; }
-
-        .recipe-header {
-            border-bottom: 2px solid var(--brand-dark-blue);
-            padding-bottom: 1%; margin-bottom: 3%; flex-shrink: 0;
-        }
-        .recipe-title { font-family: var(--font-compressed); font-size: 6cqi; color: var(--brand-dark-blue); text-transform: uppercase; line-height: 1; }
-        .recipe-meta { font-family: var(--font-hand); color: var(--brand-red); font-size: 3cqi; margin-top: 1%; }
-        
-        .ingredients-box { background-color: rgba(107, 110, 179, 0.1); padding: 5%; border-radius: 8px; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; }
-        .recipe-h3 { font-family: var(--font-condensed); color: var(--brand-dark-blue); font-size: 3.6cqi; margin-bottom: 2%; margin-top: 3%; text-transform: uppercase; }
-        .recipe-h3:first-child { margin-top: 0; }
-
-        .recipe-list { list-style-type: none; font-family: var(--font-condensed); font-size: 2.8cqi; line-height: 1.35; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
-        .recipe-list li { margin-bottom: 2%; position: relative; }
-        .ingredients-list li { padding-left: 5%; }
-        .ingredients-list li::before { content: '•'; color: var(--brand-mid-blue); position: absolute; left: 0; font-weight: bold; }
-
-        .steps-list { counter-reset: step-counter; }
-        .steps-list li { padding-left: 7.5%; margin-bottom: 3%; }
-        .steps-list li::before {
-            counter-increment: step-counter; content: counter(step-counter);
-            position: absolute; left: 0; top: 0;
-            background-color: var(--brand-dark-blue); color: white;
-            width: 3.5cqi; height: 3.5cqi; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-family: var(--font-compressed); font-size: 2cqi;
-        }
-
-        .dairy-range { display: flex; flex-direction: column; justify-content: space-evenly; flex-grow: 1; padding-bottom: 5px; }
-        .product-item { display: flex; align-items: center; background: #ffffff; border-radius: 8px; padding: 2.5%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .product-item img { width: 18%; height: auto; max-height: 70px; object-fit: contain; margin-right: 4%; }
-        .product-info h4 { font-family: var(--font-compressed); color: var(--brand-dark-blue); font-size: 3.5cqi; text-transform: uppercase; margin-bottom: 0.3%; }
-        .product-info p { font-family: var(--font-condensed); font-size: 2.4cqi; color: #4b5563; line-height: 1.2; }
-
-        .index-list { list-style: none; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        .index-item { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4%; border-bottom: 2px dotted var(--brand-grey); cursor: pointer; transition: color 0.2s; }
-        .index-item:hover { color: var(--brand-red); }
-        .index-name { font-family: var(--font-condensed); font-size: 3.8cqi; font-weight: bold; color: var(--brand-dark-blue); text-transform: uppercase; }
-        .index-page-num { font-family: var(--font-compressed); font-size: 4cqi; color: var(--brand-red); }
-
-        .back-cover-wrap { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; color: white; padding: 6%; }
-        .back-cover-wrap h2 { font-family: var(--font-compressed); font-size: 8.5cqi; margin-bottom: 2%; color: var(--brand-white); }
-        .back-cover-wrap p { font-family: var(--font-condensed); font-size: 2.6cqi; color: var(--brand-grey); margin-bottom: 1.5%; }
-
-        .recipe-dark { background-color: var(--brand-dark-blue); color: white; }
-        .recipe-dark .recipe-title, .recipe-dark .recipe-h3 { color: white; }
-        .recipe-dark .recipe-header { border-bottom-color: var(--brand-mid-blue); }
-        .recipe-dark .ingredients-box { background-color: rgba(255,255,255,0.05); }
-        .recipe-dark .steps-list li::before { background-color: var(--brand-red); }
-        .recipe-dark .ingredients-list li::before { color: var(--brand-red); }
-
-        .page-footer { text-align: center; font-size: 2cqi; color: var(--brand-grey); width: 100%; margin-top: auto; padding-top: 2%; }
-        .star-products { display: flex; justify-content: center; align-items: center; gap: 2%; margin-top: auto; padding-top: 4%; padding-bottom: 2%; width: 100%; }
-        .star-products img { height: 18cqi; max-height: 120px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); }
-
-        .video-btn {
-            display: inline-flex; align-items: center; background-color: var(--brand-red); color: white; text-decoration: none;
-            padding: 1% 4%; border-radius: 20px; font-family: var(--font-condensed); font-size: 2.5cqi; font-weight: bold; text-transform: uppercase; margin-top: 1.5%;
-            box-shadow: 0 2px 8px rgba(240, 78, 88, 0.4); transition: transform 0.2s, background-color 0.2s; cursor: pointer;
-            position: relative; z-index: 50; transform: translateZ(1px); border: none;
-        }
-        .video-btn:hover { background-color: #d93d46; transform: translateY(-2px) translateZ(1px); }
-        .video-icon { width: 3.5cqi; height: 3.5cqi; margin-right: 6px; fill: currentColor; }
-
-        .controls { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 1000; }
-        .btn {
-            background-color: var(--brand-dark-blue); color: white; border: 1px solid rgba(255,255,255,0.2);
-            width: 44px; height: 44px; display: flex; justify-content: center; align-items: center;
-            border-radius: 50%; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            transition: all 0.2s; font-size: 1.2rem; padding: 0; line-height: 1;
-        }
-        .btn:hover:not(:disabled) { background-color: var(--brand-mid-blue); transform: translateY(-2px); }
-        .btn:disabled { background-color: rgba(48, 34, 97, 0.4); cursor: not-allowed; color: #aaa; transform: none;}
-
-        /* Video Modal Styles */
-        .video-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.95);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-        .video-modal.active {
-            display: flex;
-            opacity: 1;
-        }
-        .video-container {
-            width: 90%;
-            max-width: 800px;
-            position: relative;
-        }
-        .video-container video {
-            width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            background: black;
-            outline: none;
-        }
-        .close-video {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 2.5rem;
-            cursor: pointer;
-            padding: 5px;
-            line-height: 1;
-            z-index: 2001;
-        }
-
-        @media (max-width: 768px), (orientation: portrait) {
-            .book-viewport {
-                width: 94vw;
-                height: calc(94vw / 0.8);
-                max-width: calc(85vh * 0.8);
-                max-height: 85vh;
-            }
-            @media (min-aspect-ratio: 0.8) {
-                .book-viewport {
-                    height: 85vh;
-                    width: calc(85vh * 0.8);
-                }
-            }
-
-            .book-container { width: 200%; }
-            .inner-page { padding: 8% 7% 7%; } 
-            
-            .mag-layout {
-                display: flex !important;
-                flex-direction: column !important;
-                flex: 1 1 auto !important; 
-                height: 100% !important;
-                min-height: 0 !important; 
-                overflow-y: auto !important; 
-                -webkit-overflow-scrolling: touch;
-                padding-bottom: 60px !important; 
-                gap: 4%;
-            }
-            
-            .recipe-col { width: 100%; padding-right: 0; overflow-y: visible; flex-shrink: 0; gap: 8px;}
-            .ingredients-box { height: auto !important; padding: 5% 6%; margin-bottom: 2%; }
-
-            .title-main { font-size: 13cqi; }
-            .recipe-title { font-size: 8cqi; }
-            .recipe-h3 { font-size: 5cqi; margin-top: 3%; margin-bottom: 2%; }
-            .recipe-list { font-size: 4cqi; line-height: 1.4; gap: 4px; }
-            .recipe-list li { margin-bottom: 2.5%; }
-            .recipe-meta { font-size: 3.8cqi; margin-top: 1.5%;}
-            
-            .steps-list li::before { width: 5.5cqi; height: 5.5cqi; font-size: 3cqi; }
-            .product-info h4 { font-size: 6cqi; }
-            .product-info p { font-size: 4cqi; }
-            .index-name { font-size: 6.5cqi; }
-            .index-page-num { font-size: 6.5cqi; }
-            .back-cover-wrap h2 { font-size: 14cqi; }
-            .back-cover-wrap p { font-size: 3.5cqi; }
-            .img-overlay { font-size: 6cqi; bottom: 8%; right: 5%; }
-            .page-footer { font-size: 3.5cqi; padding-top: 4%;}
-            .star-products img { max-height: 130px; height: 25cqi; }
-            
-            .video-btn { font-size: 4cqi; padding: 2% 6%; margin-top: 2.5%; border-radius: 25px; }
-            .video-icon { width: 5cqi; height: 5cqi; }
-
-            .controls { bottom: -15px; width: 100%; justify-content: center; gap: 20px; }
-            .btn { width: 48px; height: 48px; font-size: 1.4rem; }
-            
-            .close-video {
-                top: -50px;
-                right: 0;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Sundale Recipe Book</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
+​<style>
+:root {
+--brand-dark-blue: #302261;
+--brand-white: #ffffff;
+--brand-mid-blue: #6b6eb3;
+--brand-red: #f04e58;
+--brand-black: #000000;
+--brand-grey: #b2bcce;
+​--font-compressed: 'Oswald', sans-serif;
+--font-condensed: 'Oswald', sans-serif;
+--font-hand: 'Patrick Hand', cursive;
+}
+​* {
+box-sizing: border-box;
+margin: 0;
+padding: 0;
+-webkit-font-smoothing: antialiased;
+}
+​html, body {
+width: 100%;
+height: 100dvh;
+overscroll-behavior-y: none;
+touch-action: pan-x pan-y;
+overflow: hidden;
+background: radial-gradient(circle at center, #374151 0%, #111827 100%);
+font-family: var(--font-condensed);
+}
+​.stage {
+position: fixed;
+top: 0; left: 0; width: 100%; height: 100%;
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding-top: env(safe-area-inset-top);
+padding-bottom: env(safe-area-inset-bottom);
+padding-left: env(safe-area-inset-left);
+padding-right: env(safe-area-inset-right);
+}
+​.book-viewport {
+position: relative;
+width: 92vw;
+height: calc(92vw / 1.6);
+max-width: calc(80vh * 1.6);
+max-height: 80vh;
+perspective: 2500px;
+margin-bottom: 6vh;
+}
+​@media (min-aspect-ratio: 1.6) {
+.book-viewport {
+height: 80vh;
+width: calc(80vh * 1.6);
+}
+}
+​.book-container {
+width: 100%;
+height: 100%;
+position: absolute;
+transform-style: preserve-3d;
+transition: transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+​.book {
+width: 100%;
+height: 100%;
+position: relative;
+transform-style: preserve-3d;
+}
+​.page {
+width: 50%;
+height: 100%;
+position: absolute;
+right: 0;
+top: 0;
+transform-origin: left center;
+transform-style: preserve-3d;
+transition: transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1);
+background-color: var(--brand-white);
+box-shadow: inset 0 0 10px rgba(0,0,0,0.05), 5px 5px 15px rgba(0,0,0,0.15);
+}
+​.page.flipped {
+transform: rotateY(-180deg);
+box-shadow: inset 0 0 10px rgba(0,0,0,0.05), -5px 5px 15px rgba(0,0,0,0.15);
+}
+​.front, .back {
+position: absolute;
+top: 0; left: 0; width: 100%; height: 100%;
+backface-visibility: hidden;
+-webkit-backface-visibility: hidden;
+overflow: hidden;
+background-color: var(--brand-white);
+container-type: inline-size;
+}
+​.back { transform: rotateY(180deg); }
+​.hardcover .front, .hardcover .back {
+background-color: var(--brand-dark-blue) !important;
+box-shadow: inset 15px 0px 30px rgba(0,0,0,0.5);
+}
+.page.flipped .hardcover .front, .page.flipped .hardcover .back {
+box-shadow: inset -15px 0px 30px rgba(0,0,0,0.5);
+}
+.paper .front { background: linear-gradient(to right, #e5e7eb 0%, #ffffff 5%, #ffffff 100%); }
+.paper .back { background: linear-gradient(to left, #e5e7eb 0%, #ffffff 5%, #ffffff 100%); }
+​.inner-page {
+container-type: inline-size;
+padding: 5%;
+height: 100%;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+position: relative;
+}
+​.cover-content {
+display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+height: 90%; padding: 6% 5%; color: var(--brand-white); position: relative; z-index: 10;
+}
+​.brand-logo { width: 38%; max-width: 130px; display: block; }
+.cover-cow { width: 36% !important; max-width: 120px; border-radius: 8px; background-color: #ffffff; padding: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: block !important; }
+​.title-main {
+font-family: var(--font-compressed); font-size: 7cqi; font-weight: 700;
+line-height: 0.95; text-transform: uppercase; text-shadow: 2px 2px 10px rgba(0,0,0,0.4);
+text-align: center; white-space: nowrap; margin: 4% 0;
+}
+​.community-badge { width: 55%; max-width: 160px; display: block; z-index: 15; }
+.milky-wave { position: absolute; bottom: 0; left: 0; width: 100%; height: auto; z-index: 1; }
+.full-img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+​.img-overlay {
+position: absolute; bottom: 6%; right: 6%; background: var(--brand-red); color: white;
+padding: 2.5% 5.5%; font-family: var(--font-condensed); font-weight: bold; font-size: 4.2cqi;
+border-radius: 5px; text-transform: uppercase; transform: rotate(-3deg);
+box-shadow: 3px 6px 15px rgba(0,0,0,0.4); max-width: 80%; text-align: center; line-height: 1.15;
+}
+​.mag-layout {
+display: grid;
+grid-template-columns: 1fr 1.15fr;
+gap: 4%;
+flex: 1;
+min-height: 0;
+overflow: hidden;
+}
+​.recipe-col {
+display: flex; flex-direction: column; justify-content: space-between;
+overflow-y: auto; padding-right: 4px;
+scrollbar-width: none; -ms-overflow-style: none;
+}
+.recipe-col::-webkit-scrollbar { display: none; }
+​.recipe-header {
+border-bottom: 2px solid var(--brand-dark-blue);
+padding-bottom: 1%; margin-bottom: 2%; flex-shrink: 0;
+}
+.recipe-title { font-family: var(--font-compressed); font-size: 5.5cqi; color: var(--brand-dark-blue); text-transform: uppercase; line-height: 1; }
+.recipe-meta { font-family: var(--font-hand); color: var(--brand-red); font-size: 2.8cqi; margin-top: 0.5%; }
+​.ingredients-box { background-color: rgba(107, 110, 179, 0.1); padding: 4%; border-radius: 8px; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; }
+.recipe-h3 { font-family: var(--font-condensed); color: var(--brand-dark-blue); font-size: 3.2cqi; margin-bottom: 1.5%; margin-top: 2%; text-transform: uppercase; }
+.recipe-h3:first-child { margin-top: 0; }
+​.recipe-list { list-style-type: none; font-family: var(--font-condensed); font-size: 2.6cqi; line-height: 1.3; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-evenly; }
+.recipe-list li { margin-bottom: 1.5%; position: relative; }
+.ingredients-list li { padding-left: 4.5%; }
+.ingredients-list li::before { content: '•'; color: var(--brand-mid-blue); position: absolute; left: 0; font-weight: bold; }
+​.steps-list { counter-reset: step-counter; }
+.steps-list li { padding-left: 6.5%; margin-bottom: 2%; }
+.steps-list li::before {
+counter-increment: step-counter; content: counter(step-counter);
+position: absolute; left: 0; top: 0;
+background-color: var(--brand-dark-blue); color: white;
+width: 3.2cqi; height: 3.2cqi; border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+font-family: var(--font-compressed); font-size: 1.8cqi;
+}
+​.dairy-range { display: flex; flex-direction: column; justify-content: space-evenly; flex-grow: 1; padding-bottom: 5px; }
+.product-item { display: flex; align-items: center; background: #ffffff; border-radius: 8px; padding: 2%; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.product-item img { width: 16%; height: auto; max-height: 60px; object-fit: contain; margin-right: 4%; }
+.product-info h4 { font-family: var(--font-compressed); color: var(--brand-dark-blue); font-size: 3.2cqi; text-transform: uppercase; margin-bottom: 0.2%; }
+.product-info p { font-family: var(--font-condensed); font-size: 2.2cqi; color: #4b5563; line-height: 1.15; }
+​.index-list { list-style: none; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+.index-item { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3.5%; border-bottom: 2px dotted var(--brand-grey); cursor: pointer; transition: color 0.2s; }
+.index-item:hover { color: var(--brand-red); }
+.index-name { font-family: var(--font-condensed); font-size: 3.5cqi; font-weight: bold; color: var(--brand-dark-blue); text-transform: uppercase; }
+.index-page-num { font-family: var(--font-compressed); font-size: 3.8cqi; color: var(--brand-red); }
+​.back-cover-wrap { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; text-align: center; color: white; padding: 6%; }
+.back-cover-wrap h2 { font-family: var(--font-compressed); font-size: 8cqi; margin-bottom: 2%; color: var(--brand-white); }
+.back-cover-wrap p { font-family: var(--font-condensed); font-size: 2.4cqi; color: var(--brand-grey); margin-bottom: 1.2%; }
+​.recipe-dark { background-color: var(--brand-dark-blue); color: white; }
+.recipe-dark .recipe-title, .recipe-dark .recipe-h3 { color: white; }
+.recipe-dark .recipe-header { border-bottom-color: var(--brand-mid-blue); }
+.recipe-dark .ingredients-box { background-color: rgba(255,255,255,0.05); }
+.recipe-dark .steps-list li::before { background-color: var(--brand-red); }
+.recipe-dark .ingredients-list li::before { color: var(--brand-red); }
+​.page-footer { text-align: center; font-size: 1.8cqi; color: var(--brand-grey); width: 100%; margin-top: auto; padding-top: 1%; }
+.star-products { display: flex; justify-content: center; align-items: center; gap: 2%; margin-top: auto; padding-top: 2%; padding-bottom: 1%; width: 100%; }
+.star-products img { height: 14cqi; max-height: 90px; width: auto; object-fit: contain; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.15)); }
+​.video-btn {
+display: inline-flex; align-items: center; background-color: var(--brand-red); color: white; text-decoration: none;
+padding: 0.8% 3.5%; border-radius: 20px; font-family: var(--font-condensed); font-size: 2.2cqi; font-weight: bold; text-transform: uppercase; margin-top: 1%;
+box-shadow: 0 2px 8px rgba(240, 78, 88, 0.4); transition: transform 0.2s, background-color 0.2s; cursor: pointer;
+position: relative; z-index: 50; transform: translateZ(1px); pointer-events: auto;
+}
+.video-btn:hover { background-color: #d93d46; transform: translateY(-2px) translateZ(1px); }
+.video-icon { width: 3cqi; height: 3cqi; margin-right: 5px; fill: currentColor; }
+​.controls { position: relative; margin-top: 2vh; display: flex; gap: 15px; z-index: 1000; }
+.btn {
+background-color: var(--brand-dark-blue); color: white; border: 1px solid rgba(255,255,255,0.2);
+width: 40px; height: 40px; display: flex; justify-content: center; align-items: center;
+border-radius: 50%; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+transition: all 0.2s; font-size: 1.1rem; padding: 0; line-height: 1;
+}
+.btn:hover:not(:disabled) { background-color: var(--brand-mid-blue); transform: translateY(-2px); }
+.btn:disabled { background-color: rgba(48, 34, 97, 0.4); cursor: not-allowed; color: #aaa; transform: none;}
+​/* Video Modal Styles */
+.video-modal {
+position: fixed;
+top: 0; left: 0; width: 100%; height: 100%;
+background-color: rgba(0,0,0,0.95);
+display: none;
+justify-content: center;
+align-items: center;
+z-index: 2000;
+opacity: 0;
+transition: opacity 0.3s ease;
+backdrop-filter: blur(5px);
+}
+.video-modal.active {
+display: flex;
+opacity: 1;
+}
+.video-container {
+width: 90%;
+max-width: 800px;
+position: relative;
+}
+.video-container video {
+width: 100%;
+border-radius: 8px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+background: black;
+outline: none;
+}
+.close-video {
+position: absolute;
+top: -40px;
+right: 0;
+background: none;
+border: none;
+color: white;
+font-size: 2.5rem;
+cursor: pointer;
+padding: 5px;
+line-height: 1;
+z-index: 2001;
+}
+​@media (max-width: 768px), (orientation: portrait) {
+.book-viewport {
+width: 92vw;
+height: calc(92vw / 0.76);
+max-width: calc(68vh * 0.76);
+max-height: 68vh;
+margin-bottom: 2vh;
+}
+​.book-container { width: 200%; }
+.inner-page { padding: 6% 5% 5%; }
+​.mag-layout {
+display: flex !important;
+flex-direction: column !important;
+flex: 1 1 auto !important;
+height: 100% !important;
+min-height: 0 !important;
+overflow-y: auto !important;
+-webkit-overflow-scrolling: touch;
+padding-bottom: 10px !important;
+gap: 3%;
+}
+​.recipe-col { width: 100%; padding-right: 0; overflow-y: visible; flex-shrink: 0; gap: 6px;}
+.ingredients-box { height: auto !important; padding: 4% 5%; margin-bottom: 1.5%; }
+​.title-main { font-size: 11cqi; }
+.recipe-title { font-size: 7cqi; }
+.recipe-h3 { font-size: 4.5cqi; margin-top: 2%; margin-bottom: 1%; }
+.recipe-list { font-size: 3.6cqi; line-height: 1.35; gap: 3px; }
+.recipe-list li { margin-bottom: 2%; }
+.recipe-meta { font-size: 3.4cqi; margin-top: 1%;}
+​.steps-list li::before { width: 5cqi; height: 5cqi; font-size: 2.6cqi; }
+.product-info h4 { font-size: 5.5cqi; }
+.product-info p { font-size: 3.6cqi; }
+.index-name { font-size: 6cqi; }
+.index-page-num { font-size: 6cqi; }
+.back-cover-wrap h2 { font-size: 12cqi; }
+.back-cover-wrap p { font-size: 3.2cqi; }
+.img-overlay { font-size: 5.5cqi; bottom: 6%; right: 4%; }
+.page-footer { font-size: 3cqi; padding-top: 2%;}
+.star-products img { max-height: 100px; height: 20cqi; }
+​.video-btn { font-size: 3.6cqi; padding: 1.5% 5%; margin-top: 2%; border-radius: 20px; }
+.video-icon { width: 4.2cqi; height: 4.2cqi; }
+​.controls { margin-top: 1.5vh; gap: 20px; }
+.btn { width: 44px; height: 44px; font-size: 1.2rem; }
+​.close-video {
+top: -45px;
+right: 0;
+}
+}
+</style>
 </head>
 <body>
-
-    <div class="stage">
-        <div class="book-viewport">
-            <div class="book-container" id="bookContainer">
-                <div class="book" id="book">
-                    
-                    <!-- PAGE 1: Front Cover & Our Dairy Range -->
-                    <div class="page" id="p1">
-                        <div class="front hardcover" style="background-color: var(--brand-dark-blue) !important;">
-                            <div class="cover-content">
-                                <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/sundalelogo.png" alt="Sundale Logo" class="brand-logo" onerror="this.outerHTML='<h2 style=\'font-family:var(--font-compressed); font-size:8.5cqi; color:white; letter-spacing:2px; margin-bottom:2%;\'>Sundale</h2>'">
-                                <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/COW.jpg" alt="Grazing Cow" class="cover-cow" onerror="this.style.display='none'">
-                                <h1 class="title-main">Recipe Book</h1>
-                                <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Nourishing-Communties.png" alt="Nourishing Communities" class="community-badge">
-                            </div>
-                            <svg class="milky-wave" viewBox="0 0 1440 320" preserveAspectRatio="none">
-                                <path fill="#ffffff" fill-opacity="1" d="M0,224L48,224C96,224,192,224,288,202.7C384,181,480,139,576,149.3C672,160,768,224,864,229.3C960,235,1056,181,1152,144C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-                            </svg>
-                        </div>
-                        
-                        <div class="back paper">
-                            <div class="inner-page">
-                                <div class="recipe-header">
-                                    <h1 class="recipe-title" style="color: var(--brand-dark-blue);">Our Range</h1>
-                                </div>
-                                <div class="dairy-range">
-                                    <div class="product-item">
-                                        <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Milk.png" alt="Full Cream Milk" onerror="this.style.display='none'">
-                                        <div class="product-info">
-                                            <h4>Full Cream Milk</h4>
-                                            <p>Rich, creamy, and pasteurised daily from local farms.</p>
-                                        </div>
-                                    </div>
-                                    <div class="product-item">
-                                        <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/CreamCheese.png" alt="Cream Cheese" onerror="this.style.display='none'">
-                                        <div class="product-info">
-                                            <h4>Cream Cheese</h4>
-                                            <p>Smooth, rich, and perfect for baking or spreading.</p>
-                                        </div>
-                                    </div>
-                                    <div class="product-item">
-                                        <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Cream.png" alt="Spoonable Cream" onerror="this.style.display='none'">
-                                        <div class="product-info">
-                                            <h4>Spoonable Cream</h4>
-                                            <p>Luxuriously thick spoonable cream for sweet and savoury dishes.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="page" id="p2">
-                        <div class="front paper">
-                            <div class="inner-page" style="justify-content: center; align-items: center; text-align: center;">
-                                <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/COW.jpg" alt="Grazing Cow" class="cover-cow" style="margin-bottom: 6%;">
-                                <h2 style="font-family: var(--font-compressed); font-size: 8.5cqi; color: var(--brand-dark-blue); line-height: 0.9;">FAMILY<br>RECIPES</h2>
-                                <p style="font-family: var(--font-hand); color: var(--brand-red); font-size: 3.5cqi; margin-top: 3%;">Made with love from the Eastern Cape</p>
-                            </div>
-                        </div>
-                        
-                        <div class="back paper">
-                            <div class="inner-page">
-                                <div class="recipe-header">
-                                    <h1 class="recipe-title">Contents</h1>
-                                </div>
-                                <ul class="index-list">
-                                    <li class="index-item" onclick="jumpToPage(4)">
-                                        <span class="index-name">Biscoff Cheesecake</span>
-                                        <span class="index-page-num">01</span>
-                                    </li>
-                                    <li class="index-item" onclick="jumpToPage(5)">
-                                        <span class="index-name">Persian Cream Cheese Log</span>
-                                        <span class="index-page-num">02</span>
-                                    </li>
-                                    <li class="index-item" onclick="jumpToPage(6)">
-                                        <span class="index-name">Vanilla Panna Cotta</span>
-                                        <span class="index-page-num">03</span>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- PAGE 3: Graphic Divider & Recipe 1 Image -->
-                    <div class="page" id="p3">
-                        <div class="front paper">
-                            <div class="inner-page" style="justify-content: center; align-items: center; background: #f3f4f6; text-align: center;">
-                                <h2 style="font-family: var(--font-compressed); color: var(--brand-dark-blue); font-size: 6cqi; line-height: 1.2;">Fresh from the farm.<br>Let's get cooking!</h2>
-                            </div>
-                        </div>
-                        <div class="back paper">
-                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260624_124057.jpg" alt="Biscoff Cheesecake" class="full-img" onerror="this.src='https://placehold.co/800x1000/e5e7eb/302261?text=Biscoff+Cheesecake'">
-                            <div class="img-overlay">Biscoff<br>Cheesecake</div>
-                        </div>
-                    </div>
-
-                    <div class="page" id="p4">
-                        <div class="front paper">
-                            <div class="inner-page">
-                                <div class="recipe-header">
-                                    <h1 class="recipe-title">Biscoff Cheesecake</h1>
-                                    <div class="recipe-meta">Serves 10 | Chill: 4 hours</div>
-                                    <button onclick="openVideo('cheesecake.mp4')" class="video-btn">
-                                        <svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
-                                    </button>
-                                </div>
-                                <div class="mag-layout">
-                                    <div class="recipe-col ingredients-box">
-                                        <h3 class="recipe-h3">Crust</h3>
-                                        <ul class="recipe-list ingredients-list">
-                                            <li>1.5 packs Biscoff Biscuits</li>
-                                            <li>1/2 cup Butter</li>
-                                        </ul>
-                                        <h3 class="recipe-h3">Filling</h3>
-                                        <ul class="recipe-list ingredients-list">
-                                            <li>2 tubs Sundale Cream Cheese</li>
-                                            <li>1.75 cups Sundale Spoonable Cream</li>
-                                            <li>1 tbsp Vanilla Essence & 1 Lemon</li>
-                                            <li>4 tbsp Brown Sugar</li>
-                                            <li>1 tbsp Biscoff Spread</li>
-                                            <li>0.75g Gelatin Powder</li>
-                                        </ul>
-                                        <h3 class="recipe-h3">Topping</h3>
-                                        <ul class="recipe-list ingredients-list">
-                                            <li>0.5 cup Biscoff Spread</li>
-                                            <li>4 tbsp Hot Water</li>
-                                            <li>0.25g Gelatin Powder</li>
-                                        </ul>
-                                    </div>
-                                    <div class="recipe-col">
-                                        <h3 class="recipe-h3">Method</h3>
-                                        <ul class="recipe-list steps-list">
-                                            <li>Blend 1.5 packs of Biscoff biscuits fine, mix with melted butter. Press firmly into springform pan base.</li>
-                                            <li>Whisk Sundale cream cheese until smooth, add Sundale spoonable cream.</li>
-                                            <li>Add vanilla essence, lemon juice/zest, sugar, spread, and gelatin powder; mix well.</li>
-                                            <li>Spoon onto crust, spread evenly.</li>
-                                            <li>Mix topping spread, hot water, and gelatin until smooth. Fold in cream for marble effect.</li>
-                                            <li>Pour over filling and refrigerate for 4 hours until set.</li>
-                                        </ul>
-                                        
-                                        <div class="star-products">
-                                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Cream.png" alt="Sundale Spoonable Cream">
-                                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/CreamCheese.png" alt="Sundale Cream Cheese">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="page-footer">01</div>
-                            </div>
-                        </div>
-                        
-                        <div class="back paper">
-                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260701_111458.jpg" alt="Persian Cream Cheese Log" class="full-img" onerror="this.src='https://placehold.co/800x1000/e5e7eb/302261?text=Cream+Cheese+Log'">
-                            <div class="img-overlay">Persian Cream<br>Cheese Log</div>
-                        </div>
-                    </div>
-
-                    <div class="page" id="p5">
-                        <div class="front paper">
-                            <div class="inner-page">
-                                <div class="recipe-header">
-                                    <h1 class="recipe-title">Persian Cream Cheese Log</h1>
-                                    <div class="recipe-meta">Serves 4 | Prep: 15 mins | Freeze: 2 hours</div>
-                                    <button onclick="openVideo('cheeselog.mp4')" class="video-btn">
-                                        <svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
-                                    </button>
-                                </div>
-                                <div class="mag-layout">
-                                    <div class="recipe-col ingredients-box">
-                                        <h3 class="recipe-h3">Ingredients</h3>
-                                        <ul class="recipe-list ingredients-list">
-                                            <li>1 cup Sundale Cream Cheese</li>
-                                            <li>1 tbsp Lemon Zest</li>
-                                            <li>1/2 cup Pistachio Nuts (chopped)</li>
-                                            <li>1/2 cup Dried Cranberries (chopped)</li>
-                                            <li>2 tbsp Date Syrup</li>
-                                            <li>Salt & Pepper to taste</li>
-                                        </ul>
-                                    </div>
-                                    <div class="recipe-col">
-                                        <h3 class="recipe-h3">Method</h3>
-                                        <ul class="recipe-list steps-list">
-                                            <li>Place Sundale Cream Cheese into a mixing bowl and soften with the back of a spoon.</li>
-                                            <li>Add lemon zest, salt, and pepper. Whisk until well combined.</li>
-                                            <li>Scoop mixture into silicone moulds, smooth top. Freeze for 2 hours.</li>
-                                            <li>Remove from moulds; let thaw slightly. Mix chopped pistachio nuts and dried cranberries.</li>
-                                            <li>Roll logs into the nut mixture to coat, leaving sides clean.</li>
-                                            <li>Drizzle with date syrup and serve with biscuits.</li>
-                                        </ul>
-                                        <div class="star-products">
-                                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/CreamCheese.png" alt="Sundale Cream Cheese">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="page-footer">02</div>
-                            </div>
-                        </div>
-                        
-                        <div class="back paper">
-                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260907_120749.jpg" alt="Vanilla Panna Cotta" class="full-img" onerror="this.src='https://placehold.co/800x1000/e5e7eb/302261?text=Panna+Cotta'">
-                            <div class="img-overlay">Vanilla<br>Panna Cotta</div>
-                        </div>
-                    </div>
-
-                    <div class="page" id="p6">
-                        <div class="front recipe-dark hardcover">
-                        <div class="inner-page">
-                            <div class="recipe-header">
-                                <h1 class="recipe-title">Vanilla Panna Cotta</h1>
-                                <div class="recipe-meta" style="color:var(--brand-grey)">Serves 4 | Prep: 20 mins | Chill: 3-4 hours</div>
-                                <button onclick="openVideo('pannacottavideo.mp4')" class="video-btn">
-                                    <svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
-                                </button>
-                            </div>
-                            <div class="mag-layout">
-                                    <div class="recipe-col ingredients-box">
-                                        <h3 class="recipe-h3">Base</h3>
-                                        <ul class="recipe-list ingredients-list">
-                                            <li>1 cup Sundale Full Cream Milk</li>
-                                            <li>1 cup Sundale Spoonable Cream</li>
-                                            <li>1/2 cup Sugar</li>
-                                            <li>1 tbsp Powdered Gelatine & 1/2c Water</li>
-                                            <li>1 tsp Vanilla Paste</li>
-                                        </ul>
-                                        <h3 class="recipe-h3">Topping</h3>
-                                        <ul class="recipe-list ingredients-list">
-                                            <li>2 cups Fresh Strawberries</li>
-                                            <li>2 tbsp Sugar & 2 tbsp Water</li>
-                                            <li>2 tbsp Balsamic Glaze</li>
-                                        </ul>
-                                    </div>
-                                    <div class="recipe-col">
-                                        <h3 class="recipe-h3">Method</h3>
-                                        <ul class="recipe-list steps-list">
-                                            <li>Heat milk, spoonable cream, sugar & vanilla gently to simmer.</li>
-                                            <li>Bloom gelatine in water for 5 min, then whisk into hot mixture to dissolve.</li>
-                                            <li>Strain mixture, cool slightly, pour into moulds. Refrigerate 3-4 hours.</li>
-                                            <li>Blend 1 cup strawberries with sugar and water. Simmer on low heat to reduce. Cool.</li>
-                                            <li>Top set panna cottas with coulis and diced strawberries.</li>
-                                        </ul>
-                                        <div class="star-products">
-                                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Cream.png" alt="Sundale Spoonable Cream">
-                                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Milk.png" alt="Sundale Full Cream Milk">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="page-footer" style="color:var(--brand-mid-blue)">03</div>
-                            </div>
-                        </div>
-                        
-                        <div class="back hardcover" style="background-color: var(--brand-dark-blue) !important;">
-                            <div class="back-cover-wrap">
-                                <h2>Sundale</h2>
-                                <p style="color:var(--brand-mid-blue); font-weight:bold; margin-bottom: 2%;">PROUDLY SUPPORTING EASTERN CAPE COMMUNITIES</p>
-                                <p>HEAD OFFICE<br>Ikhala Road, EL IDZ<br>East London</p>
-                                <p style="margin-top: 3%; color:var(--brand-white); font-size: 2.8cqi;">www.sundale.co.za</p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        <div class="controls">
-            <button class="btn" id="prevBtn" onclick="prevPage()">&#10094;</button>
-            <button class="btn" id="nextBtn" onclick="nextPage()">&#10095;</button>
-        </div>
-    </div>
-
-    <!-- Video Modal -->
-    <div class="video-modal" id="videoModal">
-        <div class="video-container">
-            <button class="close-video" onclick="closeVideo()">&times;</button>
-            <video id="recipeVideo" controls playsinline preload="metadata">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-    </div>
-
-    <script>
-        const totalPages = 6; 
-        let currentLocation = 1;
-        let isTurning = false;
-        let mobileViewSide = 'right'; 
-
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        
-        const pages = [];
-        for(let i = 1; i <= totalPages; i++) {
-            const page = document.getElementById(`p${i}`);
-            if(page) pages.push(page);
-        }
-
-        function isMobile() {
-            return window.innerWidth <= 768 || window.matchMedia("(orientation: portrait)").matches;
-        }
-
-        window.addEventListener('resize', () => {
-            if (!isMobile()) mobileViewSide = 'right';
-            updateBookVisuals();
-        });
-
-        function updateButtons() {
-            if (isMobile()) {
-                prevBtn.disabled = (currentLocation === 1 && mobileViewSide === 'right');
-                nextBtn.disabled = (currentLocation === totalPages + 1 && mobileViewSide === 'left');
-            } else {
-                prevBtn.disabled = currentLocation === 1;
-                nextBtn.disabled = currentLocation === totalPages + 1;
-            }
-        }
-
-        function updateBookVisuals() {
-            updateButtons();
-            const container = document.getElementById('bookContainer');
-            
-            if (isMobile()) {
-                if (mobileViewSide === 'right') {
-                    container.style.transform = 'translateX(-50%)';
-                } else {
-                    container.style.transform = 'translateX(0%)';
-                }
-
-                pages.forEach((page, index) => {
-                    const pageNum = index + 1;
-                    const isFlipped = page.classList.contains('flipped');
-                    
-                    if (isTurning) {
-                        if (pageNum === currentLocation || pageNum === currentLocation - 1) {
-                            page.style.visibility = 'visible';
-                        }
-                    } else {
-                        if (mobileViewSide === 'right') {
-                            page.style.visibility = isFlipped ? 'hidden' : 'visible';
-                        } else {
-                            page.style.visibility = isFlipped ? 'visible' : 'hidden';
-                        }
-                    }
-                });
-            } else {
-                if (currentLocation === 1) {
-                    container.style.transform = 'translateX(-25%)';
-                } else if (currentLocation === totalPages + 1) {
-                    container.style.transform = 'translateX(25%)';
-                } else {
-                    container.style.transform = 'translateX(0)';
-                }
-                pages.forEach(page => page.style.visibility = 'visible');
-            }
-        }
-
-        function updateZIndexes() {
-            pages.forEach((page, index) => {
-                const pageNum = index + 1;
-                if (page.classList.contains('flipped')) {
-                    page.style.zIndex = pageNum;
-                } else {
-                    page.style.zIndex = totalPages - pageNum + 1;
-                }
-            });
-        }
-
-        function flipNextLogic() {
-            const pageToFlip = pages[currentLocation - 1];
-            pageToFlip.style.zIndex = 100 + currentLocation;
-            pageToFlip.classList.add('flipped');
-            currentLocation++;
-            setTimeout(updateZIndexes, 700);
-        }
-
-        function flipPrevLogic() {
-            const pageToFlip = pages[currentLocation - 2];
-            pageToFlip.style.zIndex = 100 + currentLocation;
-            pageToFlip.classList.remove('flipped');
-            currentLocation--;
-            setTimeout(updateZIndexes, 700);
-        }
-
-        function nextPage() {
-            if (isTurning) return;
-            
-            if (isMobile()) {
-                if (currentLocation === 1 && mobileViewSide === 'right') {
-                    isTurning = true;
-                    flipNextLogic();
-                    mobileViewSide = 'left';
-                } else if (currentLocation === totalPages + 1) {
-                    return; 
-                } else {
-                    if (mobileViewSide === 'left') {
-                        mobileViewSide = 'right';
-                    } else {
-                        isTurning = true;
-                        flipNextLogic();
-                        mobileViewSide = 'left';
-                    }
-                }
-            } else {
-                if (currentLocation <= totalPages) {
-                    isTurning = true;
-                    flipNextLogic();
-                }
-            }
-            
-            updateBookVisuals();
-            if(isTurning) setTimeout(() => { isTurning = false; updateBookVisuals(); }, 750);
-        }
-
-        function prevPage() {
-            if (isTurning) return;
-            
-            if (isMobile()) {
-                if (currentLocation === 1 && mobileViewSide === 'right') {
-                    return; 
-                } else if (currentLocation === totalPages + 1 && mobileViewSide === 'left') {
-                    isTurning = true;
-                    flipPrevLogic();
-                    mobileViewSide = 'right';
-                } else {
-                    if (mobileViewSide === 'right') {
-                        if (currentLocation > 1) mobileViewSide = 'left';
-                    } else {
-                        isTurning = true;
-                        flipPrevLogic();
-                        mobileViewSide = 'right';
-                    }
-                }
-            } else {
-                if (currentLocation > 1) {
-                    isTurning = true;
-                    flipPrevLogic();
-                }
-            }
-            
-            updateBookVisuals();
-            if(isTurning) setTimeout(() => { isTurning = false; updateBookVisuals(); }, 750);
-        }
-        
-        function jumpToPage(targetNum) {
-            if (isTurning || currentLocation === targetNum) {
-                if (isMobile() && mobileViewSide !== 'right') {
-                    mobileViewSide = 'right'; 
-                    updateBookVisuals();
-                }
-                return;
-            }
-            
-            while(currentLocation < targetNum) {
-                const pageToFlip = pages[currentLocation - 1];
-                pageToFlip.classList.add('flipped');
-                currentLocation++;
-            }
-            while(currentLocation > targetNum) {
-                const pageToFlip = pages[currentLocation - 2];
-                pageToFlip.classList.remove('flipped');
-                currentLocation--;
-            }
-            
-            mobileViewSide = 'right';
-            updateZIndexes();
-            updateBookVisuals();
-        }
-
-        let touchStartX = 0;
-        let touchEndX = 0;
-        let touchStartY = 0;
-        let touchEndY = 0;
-
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, {passive: true});
-
-        document.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            touchEndY = e.changedTouches[0].screenY;
-            handleSwipe();
-        }, {passive: true});
-
-        function handleSwipe() {
-            const xDiff = touchEndX - touchStartX;
-            const yDiff = touchEndY - touchStartY;
-            if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > 50) {
-                if (xDiff < 0) nextPage();
-                else prevPage();
-            }
-        }
-
-        // Video Modal Logic
-        const videoModal = document.getElementById('videoModal');
-        const recipeVideo = document.getElementById('recipeVideo');
-
-        function openVideo(videoUrl) {
-            recipeVideo.src = videoUrl;
-            videoModal.classList.add('active');
-            // playsinline helps it play within the page on mobile
-            recipeVideo.play().catch(e => console.log("Auto-play prevented by browser policy", e));
-        }
-
-        function closeVideo() {
-            videoModal.classList.remove('active');
-            recipeVideo.pause();
-            recipeVideo.currentTime = 0;
-            recipeVideo.src = '';
-        }
-
-        // Close video on clicking outside the player
-        videoModal.addEventListener('click', (e) => {
-            if (e.target === videoModal) {
-                closeVideo();
-            }
-        });
-
-        updateZIndexes();
-        updateBookVisuals();
-    </script>
+​<div class="stage">
+<div class="book-viewport">
+<div class="book-container" id="bookContainer">
+<div class="book" id="book">
+​<!-- PAGE 1: Front Cover & Our Dairy Range -->
+<div class="page" id="p1">
+<div class="front hardcover" style="background-color: var(--brand-dark-blue) !important;">
+<div class="cover-content">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/sundalelogo.png" alt="Sundale Logo" class="brand-logo" onerror="this.outerHTML='<h2 style=\'font-family:var(--font-compressed); font-size:8.5cqi; color:white; letter-spacing:2px; margin-bottom:2%;\'>Sundale</h2>'">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/COW.jpg" alt="Grazing Cow" class="cover-cow" onerror="this.style.display='none'">
+<h1 class="title-main">Recipe Book</h1>
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Nourishing-Communties.png" alt="Nourishing Communities" class="community-badge">
+</div>
+<svg class="milky-wave" viewBox="0 0 1440 320" preserveAspectRatio="none">
+<path fill="#ffffff" fill-opacity="1" d="M0,224L48,224C96,224,192,224,288,202.7C384,181,480,139,576,149.3C672,160,768,224,864,229.3C960,235,1056,181,1152,144C1248,107,1344,85,1392,74.7L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+</svg>
+</div>
+​<div class="back paper">
+<div class="inner-page">
+<div class="recipe-header">
+<h1 class="recipe-title" style="color: var(--brand-dark-blue);">Our Range</h1>
+</div>
+<div class="dairy-range">
+<div class="product-item">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Milk.png" alt="Full Cream Milk" onerror="this.style.display='none'">
+<div class="product-info">
+<h4>Full Cream Milk</h4>
+<p>Rich, creamy, and pasteurised daily from local farms.</p>
+</div>
+</div>
+<div class="product-item">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/CreamCheese.png" alt="Cream Cheese" onerror="this.style.display='none'">
+<div class="product-info">
+<h4>Cream Cheese</h4>
+<p>Smooth, rich, and perfect for baking or spreading.</p>
+</div>
+</div>
+<div class="product-item">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Cream.png" alt="Spoonable Cream" onerror="this.style.display='none'">
+<div class="product-info">
+<h4>Spoonable Cream</h4>
+<p>Luxuriously thick spoonable cream for sweet and savoury dishes.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+​<div class="page" id="p2">
+<div class="front paper">
+<div class="inner-page" style="justify-content: center; align-items: center; text-align: center;">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/COW.jpg" alt="Grazing Cow" class="cover-cow" style="margin-bottom: 6%;">
+<h2 style="font-family: var(--font-compressed); font-size: 8.5cqi; color: var(--brand-dark-blue); line-height: 0.9;">FAMILY
+RECIPES</h2>
+<p style="font-family: var(--font-hand); color: var(--brand-red); font-size: 3.5cqi; margin-top: 3%;">Made with love from the Eastern Cape</p>
+</div>
+</div>
+​<div class="back paper">
+<div class="inner-page">
+<div class="recipe-header">
+<h1 class="recipe-title">Contents</h1>
+</div>
+<ul class="index-list">
+<li class="index-item" onclick="jumpToPage(4)">
+<span class="index-name">Biscoff Cheesecake</span>
+<span class="index-page-num">01</span>
+</li>
+<li class="index-item" onclick="jumpToPage(5)">
+<span class="index-name">Persian Cream Cheese Log</span>
+<span class="index-page-num">02</span>
+</li>
+<li class="index-item" onclick="jumpToPage(6)">
+<span class="index-name">Vanilla Panna Cotta</span>
+<span class="index-page-num">03</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+​<!-- PAGE 3: Graphic Divider & Recipe 1 Image -->
+<div class="page" id="p3">
+<div class="front paper">
+<div class="inner-page" style="justify-content: center; align-items: center; background: #f3f4f6; text-align: center;">
+<h2 style="font-family: var(--font-compressed); color: var(--brand-dark-blue); font-size: 6cqi; line-height: 1.2;">Fresh from the farm.
+Let's get cooking!</h2>
+</div>
+</div>
+<div class="back paper">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260624_124057.jpg" alt="Biscoff Cheesecake" class="full-img" onerror="this.src='https://placehold.co/800x1000/e5e7eb/302261?text=Biscoff+Cheesecake'">
+<div class="img-overlay">Biscoff
+Cheesecake</div>
+</div>
+</div>
+​<div class="page" id="p4">
+<div class="front paper">
+<div class="inner-page">
+<div class="recipe-header">
+<h1 class="recipe-title">Biscoff Cheesecake</h1>
+<div class="recipe-meta">Serves 10 | Chill: 4 hours</div>
+<button onclick="openVideo('cheesecake.mp4')" class="video-btn">
+<svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
+</button>
+</div>
+<div class="mag-layout">
+<div class="recipe-col ingredients-box">
+<h3 class="recipe-h3">Crust</h3>
+<ul class="recipe-list ingredients-list">
+<li>1.5 packs Biscoff Biscuits</li>
+<li>1/2 cup Butter</li>
+</ul>
+<h3 class="recipe-h3">Filling</h3>
+<ul class="recipe-list ingredients-list">
+<li>2 tubs Sundale Cream Cheese</li>
+<li>1.75 cups Sundale Spoonable Cream</li>
+<li>1 tbsp Vanilla Essence & 1 Lemon</li>
+<li>4 tbsp Brown Sugar</li>
+<li>1 tbsp Biscoff Spread</li>
+<li>0.75g Gelatin Powder</li>
+</ul>
+<h3 class="recipe-h3">Topping</h3>
+<ul class="recipe-list ingredients-list">
+<li>0.5 cup Biscoff Spread</li>
+<li>4 tbsp Hot Water</li>
+<li>0.25g Gelatin Powder</li>
+</ul>
+</div>
+<div class="recipe-col">
+<h3 class="recipe-h3">Method</h3>
+<ul class="recipe-list steps-list">
+<li>Blend 1.5 packs of Biscoff biscuits fine, mix with melted butter. Press firmly into springform pan base.</li>
+<li>Whisk Sundale cream cheese until smooth, add Sundale spoonable cream.</li>
+<li>Add vanilla essence, lemon juice/zest, sugar, spread, and gelatin powder; mix well.</li>
+<li>Spoon onto crust, spread evenly.</li>
+<li>Mix topping spread, hot water, and gelatin until smooth. Fold in cream for marble effect.</li>
+<li>Pour over filling and refrigerate for 4 hours until set.</li>
+</ul>
+​<div class="star-products">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Cream.png" alt="Sundale Spoonable Cream">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/CreamCheese.png" alt="Sundale Cream Cheese">
+</div>
+</div>
+</div>
+<div class="page-footer">01</div>
+</div>
+</div>
+​<div class="back paper">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260701_111458.jpg" alt="Persian Cream Cheese Log" class="full-img" onerror="this.src='https://placehold.co/800x1000/e5e7eb/302261?text=Cream+Cheese+Log'">
+<div class="img-overlay">Persian Cream
+Cheese Log</div>
+</div>
+</div>
+​<div class="page" id="p5">
+<div class="front paper">
+<div class="inner-page">
+<div class="recipe-header">
+<h1 class="recipe-title">Persian Cream Cheese Log</h1>
+<div class="recipe-meta">Serves 4 | Prep: 15 mins | Freeze: 2 hours</div>
+<button onclick="openVideo('cheeselog.mp4')" class="video-btn">
+<svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
+</button>
+</div>
+<div class="mag-layout">
+<div class="recipe-col ingredients-box">
+<h3 class="recipe-h3">Ingredients</h3>
+<ul class="recipe-list ingredients-list">
+<li>1 cup Sundale Cream Cheese</li>
+<li>1 tbsp Lemon Zest</li>
+<li>1/2 cup Pistachio Nuts (chopped)</li>
+<li>1/2 cup Dried Cranberries (chopped)</li>
+<li>2 tbsp Date Syrup</li>
+<li>Salt & Pepper to taste</li>
+</ul>
+</div>
+<div class="recipe-col">
+<h3 class="recipe-h3">Method</h3>
+<ul class="recipe-list steps-list">
+<li>Place Sundale Cream Cheese into a mixing bowl and soften with the back of a spoon.</li>
+<li>Add lemon zest, salt, and pepper. Whisk until well combined.</li>
+<li>Scoop mixture into silicone moulds, smooth top. Freeze for 2 hours.</li>
+<li>Remove from moulds; let thaw slightly. Mix chopped pistachio nuts and dried cranberries.</li>
+<li>Roll logs into the nut mixture to coat, leaving sides clean.</li>
+<li>Drizzle with date syrup and serve with biscuits.</li>
+</ul>
+<div class="star-products">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/CreamCheese.png" alt="Sundale Cream Cheese">
+</div>
+</div>
+</div>
+<div class="page-footer">02</div>
+</div>
+</div>
+​<div class="back paper">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260907_120749.jpg" alt="Vanilla Panna Cotta" class="full-img" onerror="this.src='https://placehold.co/800x1000/e5e7eb/302261?text=Panna+Cotta'">
+<div class="img-overlay">Vanilla
+Panna Cotta</div>
+</div>
+</div>
+​<div class="page" id="p6">
+<div class="front recipe-dark hardcover">
+<div class="inner-page">
+<div class="recipe-header">
+<h1 class="recipe-title">Vanilla Panna Cotta</h1>
+<div class="recipe-meta" style="color:var(--brand-grey)">Serves 4 | Prep: 20 mins | Chill: 3-4 hours</div>
+<button onclick="openVideo('pannacottavideo.mp4')" class="video-btn">
+<svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
+</button>
+</div>
+<div class="mag-layout">
+<div class="recipe-col ingredients-box">
+<h3 class="recipe-h3">Base</h3>
+<ul class="recipe-list ingredients-list">
+<li>1 cup Sundale Full Cream Milk</li>
+<li>1 cup Sundale Spoonable Cream</li>
+<li>1/2 cup Sugar</li>
+<li>1 tbsp Powdered Gelatine & 1/2c Water</li>
+<li>1 tsp Vanilla Paste</li>
+</ul>
+<h3 class="recipe-h3">Topping</h3>
+<ul class="recipe-list ingredients-list">
+<li>2 cups Fresh Strawberries</li>
+<li>2 tbsp Sugar & 2 tbsp Water</li>
+<li>2 tbsp Balsamic Glaze</li>
+</ul>
+</div>
+<div class="recipe-col">
+<h3 class="recipe-h3">Method</h3>
+<ul class="recipe-list steps-list">
+<li>Heat milk, spoonable cream, sugar & vanilla gently to simmer.</li>
+<li>Bloom gelatine in water for 5 min, then whisk into hot mixture to dissolve.</li>
+<li>Strain mixture, cool slightly, pour into moulds. Refrigerate 3-4 hours.</li>
+<li>Blend 1 cup strawberries with sugar and water. Simmer on low heat to reduce. Cool.</li>
+<li>Top set panna cottas with coulis and diced strawberries.</li>
+</ul>
+<div class="star-products">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Cream.png" alt="Sundale Spoonable Cream">
+<img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/Milk.png" alt="Sundale Full Cream Milk">
+</div>
+</div>
+</div>
+<div class="page-footer" style="color:var(--brand-mid-blue)">03</div>
+</div>
+</div>
+​<div class="back hardcover" style="background-color: var(--brand-dark-blue) !important;">
+<div class="back-cover-wrap">
+<h2>Sundale</h2>
+<p style="color:var(--brand-mid-blue); font-weight:bold; margin-bottom: 2%;">PROUDLY SUPPORTING EASTERN CAPE COMMUNITIES</p>
+<p>HEAD OFFICE
+Ikhala Road, EL IDZ
+East London</p>
+<p style="margin-top: 3%; color:var(--brand-white); font-size: 2.8cqi;">www.sundale.co.za</p>
+</div>
+</div>
+</div>
+​</div>
+</div>
+</div>
+​<div class="controls">
+<button class="btn" id="prevBtn" onclick="prevPage()">❮</button>
+<button class="btn" id="nextBtn" onclick="nextPage()">❯</button>
+</div>
+</div>
+​<!-- Video Modal -->
+<div class="video-modal" id="videoModal">
+<div class="video-container">
+<button class="close-video" onclick="closeVideo()">×</button>
+<video id="recipeVideo" controls playsinline preload="metadata">
+Your browser does not support the video tag.
+</video>
+</div>
+</div>
+​<script>
+const totalPages = 6;
+let currentLocation = 1;
+let isTurning = false;
+let mobileViewSide = 'right';
+​const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+​const pages = [];
+for(let i = 1; i <= totalPages; i++) {
+const page = document.getElementById(p${i});
+if(page) pages.push(page);
+}
+​function isMobile() {
+return window.innerWidth <= 768 || window.matchMedia("(orientation: portrait)").matches;
+}
+​window.addEventListener('resize', () => {
+if (!isMobile()) mobileViewSide = 'right';
+updateBookVisuals();
+});
+​function updateButtons() {
+if (isMobile()) {
+prevBtn.disabled = (currentLocation === 1 && mobileViewSide === 'right');
+nextBtn.disabled = (currentLocation === totalPages + 1 && mobileViewSide === 'left');
+} else {
+prevBtn.disabled = currentLocation === 1;
+nextBtn.disabled = currentLocation === totalPages + 1;
+}
+}
+​function updateBookVisuals() {
+updateButtons();
+const container = document.getElementById('bookContainer');
+​if (isMobile()) {
+if (mobileViewSide === 'right') {
+container.style.transform = 'translateX(-50%)';
+} else {
+container.style.transform = 'translateX(0%)';
+}
+​pages.forEach((page, index) => {
+const pageNum = index + 1;
+const isFlipped = page.classList.contains('flipped');
+​if (isTurning) {
+if (pageNum === currentLocation || pageNum === currentLocation - 1) {
+page.style.visibility = 'visible';
+}
+} else {
+if (mobileViewSide === 'right') {
+page.style.visibility = isFlipped ? 'hidden' : 'visible';
+} else {
+page.style.visibility = isFlipped ? 'visible' : 'hidden';
+}
+}
+});
+} else {
+if (currentLocation === 1) {
+container.style.transform = 'translateX(-25%)';
+} else if (currentLocation === totalPages + 1) {
+container.style.transform = 'translateX(25%)';
+} else {
+container.style.transform = 'translateX(0)';
+}
+pages.forEach(page => page.style.visibility = 'visible');
+}
+}
+​function updateZIndexes() {
+pages.forEach((page, index) => {
+const pageNum = index + 1;
+if (page.classList.contains('flipped')) {
+page.style.zIndex = pageNum;
+} else {
+page.style.zIndex = totalPages - pageNum + 1;
+}
+});
+}
+​function flipNextLogic() {
+const pageToFlip = pages[currentLocation - 1];
+pageToFlip.style.zIndex = 100 + currentLocation;
+pageToFlip.classList.add('flipped');
+currentLocation++;
+setTimeout(updateZIndexes, 700);
+}
+​function flipPrevLogic() {
+const pageToFlip = pages[currentLocation - 2];
+pageToFlip.style.zIndex = 100 + currentLocation;
+pageToFlip.classList.remove('flipped');
+currentLocation--;
+setTimeout(updateZIndexes, 700);
+}
+​function nextPage() {
+if (isTurning) return;
+​if (isMobile()) {
+if (currentLocation === 1 && mobileViewSide === 'right') {
+isTurning = true;
+flipNextLogic();
+mobileViewSide = 'left';
+} else if (currentLocation === totalPages + 1) {
+return;
+} else {
+if (mobileViewSide === 'left') {
+mobileViewSide = 'right';
+} else {
+isTurning = true;
+flipNextLogic();
+mobileViewSide = 'left';
+}
+}
+} else {
+if (currentLocation <= totalPages) {
+isTurning = true;
+flipNextLogic();
+}
+}
+​updateBookVisuals();
+if(isTurning) setTimeout(() => { isTurning = false; updateBookVisuals(); }, 750);
+}
+​function prevPage() {
+if (isTurning) return;
+​if (isMobile()) {
+if (currentLocation === 1 && mobileViewSide === 'right') {
+return;
+} else if (currentLocation === totalPages + 1 && mobileViewSide === 'left') {
+isTurning = true;
+flipPrevLogic();
+mobileViewSide = 'right';
+} else {
+if (mobileViewSide === 'right') {
+if (currentLocation > 1) mobileViewSide = 'left';
+} else {
+isTurning = true;
+flipPrevLogic();
+mobileViewSide = 'right';
+}
+}
+} else {
+if (currentLocation > 1) {
+isTurning = true;
+flipPrevLogic();
+}
+}
+​updateBookVisuals();
+if(isTurning) setTimeout(() => { isTurning = false; updateBookVisuals(); }, 750);
+}
+​function jumpToPage(targetNum) {
+if (isTurning || currentLocation === targetNum) {
+if (isMobile() && mobileViewSide !== 'right') {
+mobileViewSide = 'right';
+updateBookVisuals();
+}
+return;
+}
+​while(currentLocation < targetNum) {
+const pageToFlip = pages[currentLocation - 1];
+pageToFlip.classList.add('flipped');
+currentLocation++;
+}
+while(currentLocation > targetNum) {
+const pageToFlip = pages[currentLocation - 2];
+pageToFlip.classList.remove('flipped');
+currentLocation--;
+}
+​mobileViewSide = 'right';
+updateZIndexes();
+updateBookVisuals();
+}
+​let touchStartX = 0;
+let touchEndX = 0;
+let touchStartY = 0;
+let touchEndY = 0;
+​document.addEventListener('touchstart', e => {
+touchStartX = e.changedTouches[0].screenX;
+touchStartY = e.changedTouches[0].screenY;
+}, {passive: true});
+​document.addEventListener('touchend', e => {
+touchEndX = e.changedTouches[0].screenX;
+touchEndY = e.changedTouches[0].screenY;
+handleSwipe();
+}, {passive: true});
+​function handleSwipe() {
+const xDiff = touchEndX - touchStartX;
+const yDiff = touchEndY - touchStartY;
+if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > 50) {
+if (xDiff < 0) nextPage();
+else prevPage();
+}
+}
+​// Video Modal Logic
+const videoModal = document.getElementById('videoModal');
+const recipeVideo = document.getElementById('recipeVideo');
+​function openVideo(videoUrl) {
+recipeVideo.src = videoUrl;
+videoModal.classList.add('active');
+recipeVideo.play().catch(e => console.log("Auto-play prevented", e));
+}
+​function closeVideo() {
+videoModal.classList.remove('active');
+recipeVideo.pause();
+recipeVideo.currentTime = 0;
+recipeVideo.src = '';
+}
+​videoModal.addEventListener('click', (e) => {
+if (e.target === videoModal) {
+closeVideo();
+}
+});
+​updateZIndexes();
+updateBookVisuals();
+</script>
 </body>
 </html>
