@@ -282,7 +282,7 @@
         @media (max-width: 768px), (orientation: portrait) {
             .book-viewport {
                 width: 100vw;
-                height: 98dvh; /* Safely fits inside the physical screen */
+                height: 98dvh;
                 max-width: 100vw;
                 max-height: 98dvh;
             }
@@ -295,11 +295,10 @@
 
             .book-container { width: 200%; }
             .inner-page { 
-                padding: 6% 5% 8%; /* Tighter padding */
-                justify-content: flex-start; /* Pins header to the very top */
+                padding: 6% 5% 8%;
+                justify-content: flex-start;
             } 
             
-            /* Keeps the 2-column side-by-side layout for mobile */
             .mag-layout {
                 display: grid !important;
                 grid-template-columns: 1fr 1.15fr !important;
@@ -322,7 +321,6 @@
             .recipe-list li { margin-bottom: 2%; }
             .recipe-meta { font-size: 3.5cqi; margin-top: 1%; margin-bottom: 2%;}
             
-            /* Crucial fix to prevent method numbers overlapping text */
             .steps-list li { padding-left: 7.5cqi; }
             .steps-list li::before { width: 5cqi; height: 5cqi; font-size: 2.8cqi; }
             
@@ -453,7 +451,7 @@
                                 <div class="recipe-header">
                                     <h1 class="recipe-title">Biscoff Cheesecake</h1>
                                     <div class="recipe-meta">Serves 10 | Chill: 4 hours</div>
-                                    <button onclick="openVideo('https://raw.githubusercontent.com/PCAAPPS/Sundale/main/cheesecake.mp4')" class="video-btn">
+                                    <button onclick="openVideo('cheesecake.mp4')" class="video-btn">
                                         <svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
                                     </button>
                                 </div>
@@ -513,7 +511,7 @@
                                 <div class="recipe-header">
                                     <h1 class="recipe-title">Persian Cream Cheese Log</h1>
                                     <div class="recipe-meta">Serves 4 | Prep: 15 mins | Freeze: 2 hours</div>
-                                    <button onclick="openVideo('https://raw.githubusercontent.com/PCAAPPS/Sundale/main/cheeselog.mp4')" class="video-btn">
+                                    <button onclick="openVideo('cheeselog.mp4')" class="video-btn">
                                         <svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
                                     </button>
                                 </div>
@@ -560,7 +558,7 @@
                             <div class="recipe-header">
                                 <h1 class="recipe-title">Vanilla Panna Cotta</h1>
                                 <div class="recipe-meta" style="color:var(--brand-grey)">Serves 4 | Prep: 20 mins | Chill: 3-4 hours</div>
-                                <button onclick="openVideo('https://raw.githubusercontent.com/PCAAPPS/Sundale/main/pannacottavideo.mp4')" class="video-btn">
+                                <button onclick="openVideo('pannacottavideo.mp4')" class="video-btn">
                                     <svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
                                 </button>
                             </div>
@@ -743,6 +741,7 @@
                     return; 
                 } else {
                     if (mobileViewSide === 'left') {
+                        isTurning = true; // Prevents the vanishing glitch during slides
                         mobileViewSide = 'right';
                     } else {
                         isTurning = true;
@@ -773,7 +772,10 @@
                     mobileViewSide = 'right';
                 } else {
                     if (mobileViewSide === 'right') {
-                        if (currentLocation > 1) mobileViewSide = 'left';
+                        if (currentLocation > 1) {
+                            isTurning = true; // Prevents the vanishing glitch during slides
+                            mobileViewSide = 'left';
+                        }
                     } else {
                         isTurning = true;
                         flipPrevLogic();
@@ -794,11 +796,18 @@
         function jumpToPage(targetNum) {
             if (isTurning || currentLocation === targetNum) {
                 if (isMobile() && mobileViewSide !== 'right') {
+                    isTurning = true;
                     mobileViewSide = 'right'; 
                     updateBookVisuals();
+                    setTimeout(() => { isTurning = false; updateBookVisuals(); }, 750);
                 }
                 return;
             }
+            
+            // Temporarily disable transitions so pages don't fly and glitch into each other
+            const container = document.getElementById('bookContainer');
+            container.style.transition = 'none';
+            pages.forEach(p => p.style.transition = 'none');
             
             while(currentLocation < targetNum) {
                 const pageToFlip = pages[currentLocation - 1];
@@ -814,6 +823,13 @@
             mobileViewSide = 'right';
             updateZIndexes();
             updateBookVisuals();
+            
+            // Force browser layout reflow 
+            void container.offsetWidth;
+
+            // Re-enable transitions seamlessly
+            container.style.transition = '';
+            pages.forEach(p => p.style.transition = '');
         }
 
         let touchStartX = 0;
