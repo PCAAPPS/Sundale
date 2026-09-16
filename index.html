@@ -45,7 +45,6 @@
 
         .book-viewport {
             position: relative;
-            /* Desktop strictly bound to 1.6:1 (Two 4:5 pages side-by-side) */
             width: 92vw;
             height: calc(92vw / 1.6);
             max-width: calc(82vh * 1.6);
@@ -122,7 +121,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Stretches content to fill vertical space */
+            justify-content: space-between;
             position: relative;
         }
 
@@ -175,11 +174,6 @@
         .recipe-meta { font-family: var(--font-hand); color: var(--brand-red); font-size: 3cqi; margin-top: 1%; }
         
         .ingredients-box { background-color: rgba(107, 110, 179, 0.1); padding: 5%; border-radius: 8px; height: 100%; display: flex; flex-direction: column; justify-content: space-evenly; }
-        
-        /* Desktop bypass wrappers to preserve original flex layout */
-        .split-ingredients { display: contents; }
-        .mobile-col-wrapper { display: contents; }
-        
         .recipe-h3 { font-family: var(--font-condensed); color: var(--brand-dark-blue); font-size: 3.6cqi; margin-bottom: 2%; margin-top: 3%; text-transform: uppercase; }
         .recipe-h3:first-child { margin-top: 0; }
 
@@ -230,12 +224,12 @@
             display: inline-flex; align-items: center; background-color: var(--brand-red); color: white; text-decoration: none;
             padding: 1% 4%; border-radius: 20px; font-family: var(--font-condensed); font-size: 2.5cqi; font-weight: bold; text-transform: uppercase; margin-top: 1.5%;
             box-shadow: 0 2px 8px rgba(240, 78, 88, 0.4); transition: transform 0.2s, background-color 0.2s; cursor: pointer;
-            position: relative; z-index: 50; transform: translateZ(1px); /* Hit testing fix */ pointer-events: auto;
+            position: relative; z-index: 50; transform: translateZ(1px); pointer-events: auto;
         }
         .video-btn:hover { background-color: #d93d46; transform: translateY(-2px) translateZ(1px); }
         .video-icon { width: 3.5cqi; height: 3.5cqi; margin-right: 6px; fill: currentColor; }
 
-        .controls { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 1000; }
+        .controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 1000; }
         .btn {
             background-color: var(--brand-dark-blue); color: white; border: 1px solid rgba(255,255,255,0.2);
             width: 44px; height: 44px; display: flex; justify-content: center; align-items: center;
@@ -285,78 +279,60 @@
         }
 
         @media (max-width: 768px), (orientation: portrait) {
-            html, body {
-                overflow: hidden; /* Disabled scrolling as requested */
-                touch-action: auto; /* Allow pinch-to-zoom and panning */
-            }
-
-            .stage {
-                position: fixed; 
-                height: 100%;
-                min-height: 100%;
-                align-items: flex-start; /* Start the book at the top */
-            }
-
             .book-viewport {
                 width: 100vw;
-                height: 110vh;
-                height: 112dvh; /* Made exactly 12% longer */
-                max-width: none;
-                max-height: none;
-                margin-bottom: 0; /* Removed scroll clearance margin */
+                height: 112dvh;
+                max-width: 100vw;
+                max-height: 112dvh;
+            }
+            @media (min-aspect-ratio: 0.8) {
+                .book-viewport {
+                    height: 112dvh;
+                    width: 100vw;
+                }
             }
 
             .book-container { width: 200%; }
+            .inner-page { padding: 8% 7% 10%; } 
             
-            /* Tighter padding, dynamically injecting space at the bottom to dodge the 10% screen cutoff and buttons */
-            .inner-page { padding: 4% 5% calc(10dvh + 50px); } 
-            
-            /* Convert grid to flex, stretch perfectly to eliminate cut-offs */
+            /* Keeps the 2-column side-by-side layout for mobile, as requested */
             .mag-layout {
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: space-between !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1.15fr !important;
+                gap: 4%;
                 flex: 1 1 auto !important; 
                 height: 100% !important;
                 min-height: 0 !important; 
-                overflow: hidden !important; /* Hide overflow to strictly scale */
-                gap: 1%; /* Removed empty lines/gaps */
+                overflow-y: visible !important; 
+                padding-bottom: 25px !important; 
             }
             
-            .recipe-col { width: 100%; padding-right: 0; overflow: hidden; flex-shrink: 1; gap: 2px; justify-content: space-evenly;}
-            .ingredients-box { height: auto !important; padding: 3% 4%; margin-bottom: 0; flex-shrink: 1; }
+            .recipe-col { padding-right: 0; overflow-y: visible; flex-shrink: 0; gap: 8px;}
+            .ingredients-box { height: auto !important; padding: 5% 6%; margin-bottom: 2%; }
 
-            /* Mobile 2-column grid override */
-            .split-ingredients { display: grid !important; grid-template-columns: 1fr 1fr; column-gap: 4%; }
-            .mobile-col-wrapper { display: flex !important; flex-direction: column; justify-content: flex-start; }
-            .mobile-col-wrapper .recipe-h3:first-child { margin-top: 0; }
-            .mobile-col-wrapper .recipe-h3 { margin-top: 4%; }
-
-            /* Perfectly scaled mobile typography to fit new tighter bounding layout */
-            .title-main { font-size: 10.5cqi; margin: 2% 0; }
-            .recipe-title { font-size: 6.5cqi; margin-bottom: 0; }
-            .recipe-h3 { font-size: 4cqi; margin-top: 1%; margin-bottom: 1%; }
-            .recipe-list { font-size: 3.3cqi; line-height: 1.15; gap: 0; }
-            .recipe-list li { margin-bottom: 1%; }
-            .recipe-meta { font-size: 3cqi; margin-top: 0;}
+            .title-main { font-size: 13cqi; }
+            .recipe-title { font-size: 8cqi; }
+            .recipe-h3 { font-size: 5cqi; margin-top: 3%; margin-bottom: 2%; }
+            .recipe-list { font-size: 4cqi; line-height: 1.4; gap: 4px; }
+            .recipe-list li { margin-bottom: 2.5%; }
+            .recipe-meta { font-size: 3.8cqi; margin-top: 1.5%;}
             
-            .steps-list li::before { width: 4cqi; height: 4cqi; font-size: 2.2cqi; }
-            .product-info h4 { font-size: 4.5cqi; }
-            .product-info p { font-size: 3.2cqi; }
-            .index-name { font-size: 5cqi; }
-            .index-page-num { font-size: 5cqi; }
-            .back-cover-wrap h2 { font-size: 11cqi; }
-            .back-cover-wrap p { font-size: 3cqi; }
-            .img-overlay { font-size: 4.5cqi; bottom: calc(10dvh + 6%); right: 4%; }
-            .page-footer { font-size: 2.8cqi; padding-top: 1%; margin-top: 0;}
-            .star-products { padding-top: 1%; padding-bottom: 1%; }
-            .star-products img { max-height: 70px; height: 14cqi; }
+            .steps-list li::before { width: 5.5cqi; height: 5.5cqi; font-size: 3cqi; }
+            .product-info h4 { font-size: 6cqi; }
+            .product-info p { font-size: 4cqi; }
+            .index-name { font-size: 6.5cqi; }
+            .index-page-num { font-size: 6.5cqi; }
+            .back-cover-wrap h2 { font-size: 14cqi; }
+            .back-cover-wrap p { font-size: 3.5cqi; }
+            .img-overlay { font-size: 6cqi; bottom: 8%; right: 5%; }
+            .page-footer { font-size: 3.5cqi; padding-top: 4%;}
+            .star-products img { max-height: 130px; height: 25cqi; }
             
-            .video-btn { font-size: 3cqi; padding: 1% 3%; margin-top: 1%; border-radius: 15px; }
-            .video-icon { width: 3.5cqi; height: 3.5cqi; }
+            .video-btn { font-size: 4cqi; padding: 2% 6%; margin-top: 2.5%; border-radius: 25px; }
+            .video-icon { width: 5cqi; height: 5cqi; }
 
-            .controls { position: fixed; bottom: 15px; width: 100%; justify-content: center; gap: 20px; z-index: 1000; }
-            .btn { width: 45px; height: 45px; font-size: 1.2rem; }
+            .controls { position: fixed; bottom: 15px; width: 100%; justify-content: center; gap: 20px; }
+            .btn { width: 48px; height: 48px; font-size: 1.4rem; }
             
             .close-video {
                 top: -45px;
@@ -373,7 +349,6 @@
             <div class="book-container" id="bookContainer">
                 <div class="book" id="book">
                     
-                    <!-- PAGE 1: Front Cover & Our Dairy Range -->
                     <div class="page" id="p1">
                         <div class="front hardcover" style="background-color: var(--brand-dark-blue) !important;">
                             <div class="cover-content">
@@ -419,13 +394,12 @@
                         </div>
                     </div>
 
-                    <!-- PAGE 2: Table of Contents -->
                     <div class="page" id="p2">
                         <div class="front paper">
                             <div class="inner-page" style="justify-content: center; align-items: center; text-align: center;">
-                                <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/COW.jpg" alt="Grazing Cow" class="cover-cow" style="margin-bottom: 6%;">
-                                <h2 style="font-family: var(--font-compressed); font-size: 8.5cqi; color: var(--brand-dark-blue); line-height: 0.9;">FAMILY<br>RECIPES</h2>
-                                <p style="font-family: var(--font-hand); color: var(--brand-red); font-size: 3.5cqi; margin-top: 3%;">Made with love from the Eastern Cape</p>
+                                <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/COW.jpg" alt="Grazing Cow" class="cover-cow" style="width: 85% !important; max-width: 350px; margin-bottom: 15%;">
+                                <h2 style="font-family: var(--font-compressed); font-size: 24cqi; color: var(--brand-dark-blue); line-height: 0.9;">FAMILY<br>RECIPES</h2>
+                                <p style="font-family: var(--font-hand); color: var(--brand-red); font-size: 8cqi; margin-top: 8%;">Made with love from the Eastern Cape</p>
                             </div>
                         </div>
                         
@@ -452,7 +426,6 @@
                         </div>
                     </div>
 
-                    <!-- PAGE 3: Graphic Divider & Recipe 1 Image -->
                     <div class="page" id="p3">
                         <div class="front paper">
                             <div class="inner-page" style="justify-content: center; align-items: center; background: #f3f4f6; text-align: center;">
@@ -477,32 +450,26 @@
                                 </div>
                                 <div class="mag-layout">
                                     <div class="recipe-col ingredients-box">
-                                        <div class="split-ingredients">
-                                            <div class="mobile-col-wrapper">
-                                                <h3 class="recipe-h3">Crust</h3>
-                                                <ul class="recipe-list ingredients-list">
-                                                    <li>1.5 packs Biscoff Biscuits</li>
-                                                    <li>1/2 cup Butter</li>
-                                                </ul>
-                                                <h3 class="recipe-h3">Topping</h3>
-                                                <ul class="recipe-list ingredients-list">
-                                                    <li>0.5 cup Biscoff Spread</li>
-                                                    <li>4 tbsp Hot Water</li>
-                                                    <li>0.25g Gelatin Powder</li>
-                                                </ul>
-                                            </div>
-                                            <div class="mobile-col-wrapper">
-                                                <h3 class="recipe-h3">Filling</h3>
-                                                <ul class="recipe-list ingredients-list">
-                                                    <li>2 tubs Sundale Cream Cheese</li>
-                                                    <li>1.75 cups Sundale Spoonable Cream</li>
-                                                    <li>1 tbsp Vanilla Essence & 1 Lemon</li>
-                                                    <li>4 tbsp Brown Sugar</li>
-                                                    <li>1 tbsp Biscoff Spread</li>
-                                                    <li>0.75g Gelatin Powder</li>
-                                                </ul>
-                                            </div>
-                                        </div>
+                                        <h3 class="recipe-h3">Crust</h3>
+                                        <ul class="recipe-list ingredients-list">
+                                            <li>1.5 packs Biscoff Biscuits</li>
+                                            <li>1/2 cup Butter</li>
+                                        </ul>
+                                        <h3 class="recipe-h3">Filling</h3>
+                                        <ul class="recipe-list ingredients-list">
+                                            <li>2 tubs Sundale Cream Cheese</li>
+                                            <li>1.75 cups Sundale Spoonable Cream</li>
+                                            <li>1 tbsp Vanilla Essence & 1 Lemon</li>
+                                            <li>4 tbsp Brown Sugar</li>
+                                            <li>1 tbsp Biscoff Spread</li>
+                                            <li>0.75g Gelatin Powder</li>
+                                        </ul>
+                                        <h3 class="recipe-h3">Topping</h3>
+                                        <ul class="recipe-list ingredients-list">
+                                            <li>0.5 cup Biscoff Spread</li>
+                                            <li>4 tbsp Hot Water</li>
+                                            <li>0.25g Gelatin Powder</li>
+                                        </ul>
                                     </div>
                                     <div class="recipe-col">
                                         <h3 class="recipe-h3">Method</h3>
@@ -649,7 +616,7 @@
         <div class="video-container">
             <button class="close-video" onclick="closeVideo()">&times;</button>
             <video id="recipeVideo" autoplay muted playsinline loop controls>
-                <source id="recipeVideoSource" src="" type="video/mp4">
+                <source src="" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         </div>
@@ -865,14 +832,13 @@
             }
         }
 
-        // Video Modal Logic
         const videoModal = document.getElementById('videoModal');
         const recipeVideo = document.getElementById('recipeVideo');
-        const recipeVideoSource = document.getElementById('recipeVideoSource');
 
         function openVideo(videoUrl) {
-            recipeVideoSource.src = videoUrl;
-            recipeVideo.load(); // Required to load the new source
+            const videoSource = recipeVideo.querySelector('source');
+            videoSource.src = videoUrl;
+            recipeVideo.load();
             videoModal.classList.add('active');
             recipeVideo.play().catch(e => console.log("Auto-play prevented", e));
         }
@@ -881,11 +847,10 @@
             videoModal.classList.remove('active');
             recipeVideo.pause();
             recipeVideo.currentTime = 0;
-            recipeVideoSource.src = '';
-            recipeVideo.load();
+            const videoSource = recipeVideo.querySelector('source');
+            videoSource.src = '';
         }
 
-        // Close video on clicking outside the player
         videoModal.addEventListener('click', (e) => {
             if (e.target === videoModal) {
                 closeVideo();
