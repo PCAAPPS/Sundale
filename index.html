@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Sundale Recipe Book</title>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Patrick+Hand&display=swap" rel="stylesheet">
     
@@ -29,7 +29,11 @@
 
         html, body {
             width: 100%;
-            height: 100%;
+            /* Use dynamic viewport height to fix mobile toolbar cut-offs */
+            height: 100dvh;
+            /* Prevent pull-to-refresh and bounce effects on mobile */
+            overscroll-behavior-y: none;
+            touch-action: pan-x pan-y;
             overflow: hidden;
             background: radial-gradient(circle at center, #374151 0%, #111827 100%);
             font-family: var(--font-condensed);
@@ -41,6 +45,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            /* Respect device notches and safe areas */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
         }
 
         .book-viewport {
@@ -122,7 +131,7 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: space-between; /* Stretches content to fill vertical space */
+            justify-content: space-between;
             position: relative;
         }
 
@@ -225,7 +234,7 @@
             display: inline-flex; align-items: center; background-color: var(--brand-red); color: white; text-decoration: none;
             padding: 1% 4%; border-radius: 20px; font-family: var(--font-condensed); font-size: 2.5cqi; font-weight: bold; text-transform: uppercase; margin-top: 1.5%;
             box-shadow: 0 2px 8px rgba(240, 78, 88, 0.4); transition: transform 0.2s, background-color 0.2s; cursor: pointer;
-            position: relative; z-index: 50; transform: translateZ(1px); /* Hit testing fix */ pointer-events: auto;
+            position: relative; z-index: 50; transform: translateZ(1px); border: none;
         }
         .video-btn:hover { background-color: #d93d46; transform: translateY(-2px) translateZ(1px); }
         .video-icon { width: 3.5cqi; height: 3.5cqi; margin-right: 6px; fill: currentColor; }
@@ -239,6 +248,49 @@
         }
         .btn:hover:not(:disabled) { background-color: var(--brand-mid-blue); transform: translateY(-2px); }
         .btn:disabled { background-color: rgba(48, 34, 97, 0.4); cursor: not-allowed; color: #aaa; transform: none;}
+
+        /* Video Modal Styles */
+        .video-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        .video-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+        .video-container {
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+        }
+        .video-container video {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: black;
+            outline: none;
+        }
+        .close-video {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            padding: 5px;
+            line-height: 1;
+            z-index: 2001;
+        }
 
         @media (max-width: 768px), (orientation: portrait) {
             .book-viewport {
@@ -257,7 +309,6 @@
             .book-container { width: 200%; }
             .inner-page { padding: 8% 7% 7%; } 
             
-            /* Convert grid to flex, ensure it stretches perfectly */
             .mag-layout {
                 display: flex !important;
                 flex-direction: column !important;
@@ -266,14 +317,13 @@
                 min-height: 0 !important; 
                 overflow-y: auto !important; 
                 -webkit-overflow-scrolling: touch;
-                padding-bottom: 60px !important; /* Safety net for tiny devices */
+                padding-bottom: 60px !important; 
                 gap: 4%;
             }
             
             .recipe-col { width: 100%; padding-right: 0; overflow-y: visible; flex-shrink: 0; gap: 8px;}
             .ingredients-box { height: auto !important; padding: 5% 6%; margin-bottom: 2%; }
 
-            /* Perfectly scaled mobile typography to fit within height */
             .title-main { font-size: 13cqi; }
             .recipe-title { font-size: 8cqi; }
             .recipe-h3 { font-size: 5cqi; margin-top: 3%; margin-bottom: 2%; }
@@ -297,6 +347,11 @@
 
             .controls { bottom: -15px; width: 100%; justify-content: center; gap: 20px; }
             .btn { width: 48px; height: 48px; font-size: 1.4rem; }
+            
+            .close-video {
+                top: -50px;
+                right: 0;
+            }
         }
     </style>
 </head>
@@ -404,9 +459,9 @@
                                 <div class="recipe-header">
                                     <h1 class="recipe-title">Biscoff Cheesecake</h1>
                                     <div class="recipe-meta">Serves 10 | Chill: 4 hours</div>
-                                    <a href="cheesecake.mp4" target="_blank" rel="noopener noreferrer" download onclick="event.stopPropagation();" class="video-btn">
-                                        <svg class="video-icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> Download Video
-                                    </a>
+                                    <button onclick="openVideo('cheesecake.mp4')" class="video-btn">
+                                        <svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
+                                    </button>
                                 </div>
                                 <div class="mag-layout">
                                     <div class="recipe-col ingredients-box">
@@ -464,9 +519,9 @@
                                 <div class="recipe-header">
                                     <h1 class="recipe-title">Persian Cream Cheese Log</h1>
                                     <div class="recipe-meta">Serves 4 | Prep: 15 mins | Freeze: 2 hours</div>
-                                    <a href="cheeselog.mp4" target="_blank" rel="noopener noreferrer" download onclick="event.stopPropagation();" class="video-btn">
-                                        <svg class="video-icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> Download Video
-                                    </a>
+                                    <button onclick="openVideo('cheeselog.mp4')" class="video-btn">
+                                        <svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
+                                    </button>
                                 </div>
                                 <div class="mag-layout">
                                     <div class="recipe-col ingredients-box">
@@ -511,9 +566,9 @@
                             <div class="recipe-header">
                                 <h1 class="recipe-title">Vanilla Panna Cotta</h1>
                                 <div class="recipe-meta" style="color:var(--brand-grey)">Serves 4 | Prep: 20 mins | Chill: 3-4 hours</div>
-                                <a href="pannacottavideo.mp4" target="_blank" rel="noopener noreferrer" download onclick="event.stopPropagation();" class="video-btn">
-                                    <svg class="video-icon" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> Download Video
-                                </a>
+                                <button onclick="openVideo('pannacottavideo.mp4')" class="video-btn">
+                                    <svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
+                                </button>
                             </div>
                             <div class="mag-layout">
                                     <div class="recipe-col ingredients-box">
@@ -568,6 +623,16 @@
         <div class="controls">
             <button class="btn" id="prevBtn" onclick="prevPage()">&#10094;</button>
             <button class="btn" id="nextBtn" onclick="nextPage()">&#10095;</button>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div class="video-modal" id="videoModal">
+        <div class="video-container">
+            <button class="close-video" onclick="closeVideo()">&times;</button>
+            <video id="recipeVideo" controls playsinline preload="metadata">
+                Your browser does not support the video tag.
+            </video>
         </div>
     </div>
 
@@ -780,6 +845,31 @@
                 else prevPage();
             }
         }
+
+        // Video Modal Logic
+        const videoModal = document.getElementById('videoModal');
+        const recipeVideo = document.getElementById('recipeVideo');
+
+        function openVideo(videoUrl) {
+            recipeVideo.src = videoUrl;
+            videoModal.classList.add('active');
+            // playsinline helps it play within the page on mobile
+            recipeVideo.play().catch(e => console.log("Auto-play prevented by browser policy", e));
+        }
+
+        function closeVideo() {
+            videoModal.classList.remove('active');
+            recipeVideo.pause();
+            recipeVideo.currentTime = 0;
+            recipeVideo.src = '';
+        }
+
+        // Close video on clicking outside the player
+        videoModal.addEventListener('click', (e) => {
+            if (e.target === videoModal) {
+                closeVideo();
+            }
+        });
 
         updateZIndexes();
         updateBookVisuals();
