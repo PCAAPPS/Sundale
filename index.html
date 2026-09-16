@@ -210,13 +210,6 @@
         .back-cover-wrap h2 { font-family: var(--font-compressed); font-size: 8.5cqi; margin-bottom: 2%; color: var(--brand-white); }
         .back-cover-wrap p { font-family: var(--font-condensed); font-size: 2.6cqi; color: var(--brand-grey); margin-bottom: 1.5%; }
 
-        .recipe-dark { background-color: var(--brand-dark-blue); color: white; }
-        .recipe-dark .recipe-title, .recipe-dark .recipe-h3 { color: white; }
-        .recipe-dark .recipe-header { border-bottom-color: var(--brand-mid-blue); }
-        .recipe-dark .ingredients-box { background-color: rgba(255,255,255,0.05); }
-        .recipe-dark .steps-list li::before { background-color: var(--brand-red); }
-        .recipe-dark .ingredients-list li::before { color: var(--brand-red); }
-
         .page-footer { text-align: center; font-size: 2cqi; color: var(--brand-grey); width: 100%; margin-top: auto; padding-top: 2%; }
         .star-products { display: flex; justify-content: center; align-items: center; gap: 2%; margin-top: auto; padding-top: 4%; padding-bottom: 2%; width: 100%; }
         .star-products img { height: 18cqi; max-height: 120px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); }
@@ -547,17 +540,17 @@
                         </div>
                         
                         <div class="back paper">
-                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/20260907_120749.jpg" alt="Vanilla Panna Cotta" class="full-img" onerror="this.src='https://placehold.co/800x1000/e5e7eb/302261?text=Panna+Cotta'">
+                            <img src="https://raw.githubusercontent.com/PCAAPPS/Sundale/main/panna.jpg" alt="Vanilla Panna Cotta" class="full-img" onerror="this.src='https://placehold.co/800x1000/e5e7eb/302261?text=Panna+Cotta'">
                             <div class="img-overlay">Vanilla<br>Panna Cotta</div>
                         </div>
                     </div>
 
                     <div class="page" id="p6">
-                        <div class="front recipe-dark hardcover">
+                        <div class="front paper">
                         <div class="inner-page">
                             <div class="recipe-header">
                                 <h1 class="recipe-title">Vanilla Panna Cotta</h1>
-                                <div class="recipe-meta" style="color:var(--brand-grey)">Serves 4 | Prep: 20 mins | Chill: 3-4 hours</div>
+                                <div class="recipe-meta">Serves 4 | Prep: 20 mins | Chill: 3-4 hours</div>
                                 <button onclick="openVideo('pannacottavideo.mp4')" class="video-btn">
                                     <svg class="video-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> Watch Video
                                 </button>
@@ -594,7 +587,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="page-footer" style="color:var(--brand-mid-blue)">03</div>
+                                <div class="page-footer">03</div>
                             </div>
                         </div>
                         
@@ -741,7 +734,7 @@
                     return; 
                 } else {
                     if (mobileViewSide === 'left') {
-                        isTurning = true; // Prevents the vanishing glitch during slides
+                        isTurning = true; 
                         mobileViewSide = 'right';
                     } else {
                         isTurning = true;
@@ -773,7 +766,7 @@
                 } else {
                     if (mobileViewSide === 'right') {
                         if (currentLocation > 1) {
-                            isTurning = true; // Prevents the vanishing glitch during slides
+                            isTurning = true; 
                             mobileViewSide = 'left';
                         }
                     } else {
@@ -804,7 +797,6 @@
                 return;
             }
             
-            // Temporarily disable transitions so pages don't fly and glitch into each other
             const container = document.getElementById('bookContainer');
             container.style.transition = 'none';
             pages.forEach(p => p.style.transition = 'none');
@@ -824,10 +816,8 @@
             updateZIndexes();
             updateBookVisuals();
             
-            // Force browser layout reflow 
             void container.offsetWidth;
 
-            // Re-enable transitions seamlessly
             container.style.transition = '';
             pages.forEach(p => p.style.transition = '');
         }
