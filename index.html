@@ -295,7 +295,7 @@
             .book-container { width: 200%; }
             .inner-page { padding: 8% 7% 10%; } 
             
-            /* Keeps the 2-column side-by-side layout for mobile, as requested */
+            /* Keeps the 2-column side-by-side layout for mobile */
             .mag-layout {
                 display: grid !important;
                 grid-template-columns: 1fr 1.15fr !important;
@@ -317,7 +317,10 @@
             .recipe-list li { margin-bottom: 2.5%; }
             .recipe-meta { font-size: 3.8cqi; margin-top: 1.5%;}
             
+            /* Crucial fix to prevent method numbers overlapping text */
+            .steps-list li { padding-left: 7.5cqi; }
             .steps-list li::before { width: 5.5cqi; height: 5.5cqi; font-size: 3cqi; }
+            
             .product-info h4 { font-size: 6cqi; }
             .product-info p { font-size: 4cqi; }
             .index-name { font-size: 6.5cqi; }
